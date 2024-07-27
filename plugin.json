@@ -7,10 +7,10 @@
         {
         "name": "LxHentai",
         "author": "VbooksT",
-        "path": "https://raw.githubusercontent.com/spirittomb991/VbooksT/master/lxhentai/plugin.zip",
+        "path": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/lxhentai/plugin.zip",
         "version": 1,
-        "source": "https://lxmanga.cfd",
-        "icon": "https://raw.githubusercontent.com/spirittomb991/VbooksT/master/lxhentai/icon.png",
+        "source": "https://lxmanga.life",
+        "icon": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/lxhentai/plugin.zip",
         "description": "Đọc truyện trên trang Lxhentai",
         "tag": "nsfw",
         "type": "comic",
