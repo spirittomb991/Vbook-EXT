@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "author": "VbooksT",
+    "description": "Không biết gì ^^!"
+  },
+  "data": [
+        {
+        "name": "LxHentai",
+        "author": "VbooksT",
+        "path": "https://raw.githubusercontent.com/spirittomb991/VbooksT/master/lxhentai/plugin.zip",
+        "version": 1,
+        "source": "https://lxmanga.cfd",
+        "icon": "https://raw.githubusercontent.com/spirittomb991/VbooksT/master/lxhentai/icon.png",
+        "description": "Đọc truyện trên trang Lxhentai",
+        "tag": "nsfw",
+        "type": "comic",
+        "locale": "vi_VN"
+        }
+    ]
+}
