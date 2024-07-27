@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "name": "LxHentai",
-    "author": "Nhocconsr",
+    "name": "T-LxHentai",
+    "author": "VbookT",
     "version": 9,
     "source": "https://lxmanga.life",
     "regexp": "(www.)?(lxmanga|lxhentai).*?/truyen/.*",
