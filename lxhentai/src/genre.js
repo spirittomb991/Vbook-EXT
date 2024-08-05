@@ -3,7 +3,7 @@ function execute() {
         {
             "input": "/the-loai/3d",
             "title": "3D",
-            "script": "cat.js"
+            "script": "page.js"
         },
         {
             "input": "/the-loai/adult",
