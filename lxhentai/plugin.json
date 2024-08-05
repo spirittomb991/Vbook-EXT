@@ -16,6 +16,7 @@
     "genre": "genre.js",
     "detail": "detail.js",
     "search": "search.js",
+    "page": "gen.js",
     "toc": "toc.js",
     "chap": "chap.js"
   }
