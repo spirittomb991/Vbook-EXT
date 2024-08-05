@@ -1,5 +1,6 @@
 function execute(url, page) {
     if (!page) page = 1;
+    load('config.js');
     let response = fetch(BASE_URL + url,{
         method: "GET",
         queries: {
