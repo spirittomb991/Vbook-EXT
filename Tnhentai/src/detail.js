@@ -1,11 +1,11 @@
 function execute(url) {
-    const doc = Http.get(url).html()
+    let doc = fetch(url).html()
 
     return Response.success({
-        name: doc.select(".title .pretty").first().text(),
+        name: doc.select("h1").first().text(),
         cover: doc.select("#cover img").first().attr("data-src"),
         author: doc.select("a[href^=/artist/]").first().text(),
-        description: doc.select("#tags").html(),
+        description: doc.select("h2").html(),
         detail: doc.select("#info").html(),
         host: "https://nhentai.website",
         ongoing: false,
