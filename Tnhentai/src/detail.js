@@ -6,7 +6,7 @@ function execute(url) {
         cover: doc.select("#cover img").first().attr("data-src"),
         author: doc.select("a[href^=/artist/]").first().text(),
         description: doc.select("h2").html(),
-        detail: doc.select("#info").html(),
+        detail: doc.select("h3").html(),
         host: "https://nhentai.website",
         ongoing: false,
         nsfw: true
