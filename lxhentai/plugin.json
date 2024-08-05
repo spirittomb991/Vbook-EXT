@@ -2,7 +2,7 @@
   "metadata": {
     "name": "T-LxHentai",
     "author": "VbookT",
-    "version": 11,
+    "version": 3,
     "source": "https://lxmanga.life",
     "regexp": "(www.)?(lxmanga|lxhentai).*?/truyen/.*",
     "description": "Đọc truyện trên trang lxmanga.life",
