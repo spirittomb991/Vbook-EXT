@@ -16,7 +16,6 @@
         "type": "comic",
         "locale": "vi_VN"
         },
-        
          {
         "name": "T-Tangthuvien",
         "author": "VbooksT",
@@ -30,5 +29,4 @@
         "locale": "vi_VN"
         }
     ]
-    
 }
