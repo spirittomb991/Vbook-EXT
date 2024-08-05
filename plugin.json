@@ -36,7 +36,19 @@
         "source": "https://truyen.tangthuvien.vn",
         "icon": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Thentaivn/plugin.zip",
         "description": "Đọc truyện trên trang tangthuvien",
-        "tag": "",
+        "tag": "nsfw",
+        "type": "comic",
+        "locale": "vi_VN"
+        },
+         {
+        "name": "T-nHentai",
+        "author": "VbooksT",
+        "path": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Tnhentai/plugin.zip",
+        "version": 1,
+        "source": "https://nhentai.website",
+        "icon": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Tnhentai/plugin.zip",
+        "description": "Đọc truyện trên trang nHentai",
+        "tag": "nsfw",
         "type": "comic",
         "locale": "vi_VN"
         }
