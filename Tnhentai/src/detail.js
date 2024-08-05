@@ -4,11 +4,11 @@ function execute(url) {
     return Response.success({
         name: doc.select("h1").first().text(),
         cover: doc.select("#cover img").first().attr("data-src"),
-        author: doc.select("a[href^=/artist/]").first().text(),
+        author: doc.select("[href^=/artist/] .name").first().text(),
         description: doc.select("h2").html(),
-        detail: doc.select("h3").html(),
+        detail: doc.select(".tags .name").text(),
         host: "https://nhentai.website",
-        ongoing: false,
+        ongoing: true,
         nsfw: true
     });
 }
