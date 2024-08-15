@@ -39,6 +39,18 @@
         "tag": "nsfw",
         "type": "comic",
         "locale": "vi_VN"
+        },
+         {
+        "name": "T-HentaiCube",
+        "author": "VbooksT",
+        "path": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Thentaicube/plugin.zip",
+        "version": 1,
+        "source": "https://hentaicube.net",
+        "icon": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Thentaicube/plugin.zip",
+        "description": "Đọc truyện trên trang Hentai Cube",
+        "tag": "nsfw",
+        "type": "comic",
+        "locale": "vi_VN"
         }
     ]
 }
