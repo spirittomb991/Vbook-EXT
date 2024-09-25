@@ -2,7 +2,7 @@
   "metadata": {
     "name": "T-Hentai Cube",
     "author": "VbookT",
-    "version": 2.1,
+    "version": 3,
     "source": "https://hentaicb.lol",
     "regexp": "(www.)?hentaicb.lol/read/.*",
     "description": "V1 : TEST",
