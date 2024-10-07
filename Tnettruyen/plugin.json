@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "name": "T-Net Truyện",
-    "author": "VbookT",
-    "version": 5,
+    "name": "T-NetTruyen",
+    "author": "VbooksT",
+    "version": 6,
     "source": "https://nettruyenww.com",
-    "regexp": "(www.)?(nhattruyen|nettruyen|nettruyentop|nettruyenvip|nettruyenpro|nettruyengo|nettruyenmoi|nettruyenone|nettruyenco|nettruyenme|nettruyenin|nettruyenon|nettruyentv|nettruyenmin|nettruyenking|nettruyenvi|nettruyenplus|nettruyenmax).(com|vn)/truyen-tranh/[^/]+/?$",
-    "description": "Đọc truyện trên trang Net Truyện",
+    "regexp": "(www.)?nettruyenviet.com/manga/[^/]+/?$",
+    "description": "Đọc truyện trên trang NetTruyen (Fake #2)",
     "locale": "vi_VN",
     "language": "javascript",
     "type": "comic"
