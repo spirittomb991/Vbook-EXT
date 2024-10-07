@@ -19,8 +19,6 @@ function execute(url) {
             });
         });
 
-        let comicId = /gOpts.comicId=(.*?);/.exec(doc.html())[1];
-        let token = /gOpts.key=.(.*?).;/.exec(doc.html())[1];
 
         let detail = doc.select("#item-detail .small").first().text();
         let view = doc.select(".list-info p").last().text();
@@ -35,10 +33,6 @@ function execute(url) {
             detail: detail,
             ongoing: doc.select(".detail-info .status").html().indexOf("Đang tiến hành") >= 0,
             genres: genres,
-            comment: {
-                input: BASE_URL + "/Comic/Services/CommentService.asmx/List?comicId=" + comicId + "&orderBy=0&chapterId=-1&parentId=0&token=" + token,
-                script: "comment.js"
-            },
             host: BASE_URL
         });
     }
