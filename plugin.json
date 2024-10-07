@@ -51,6 +51,28 @@
         "tag": "nsfw",
         "type": "comic",
         "locale": "vi_VN"
+        },
+         {
+        "name": "T-TruyenTranhTuan",
+        "author": "VbooksT",
+        "path": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Ttruyentranhtuan/plugin.zip",
+        "version": 1,
+        "source": "https://hentaicb.lol",
+        "icon": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Ttruyentranhtuan/plugin.zip",
+        "description": "Đọc truyện trên trang TruyenTranhTuan",
+        "type": "comic",
+        "locale": "vi_VN"
+        },
+         {
+        "name": "T-NetTruyen",
+        "author": "VbooksT",
+        "path": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Tnettruyen/plugin.zip",
+        "version": 1,
+        "source": "https://hentaicb.lol",
+        "icon": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Tnettruyen/plugin.zip",
+        "description": "Đọc truyện trên trang NetTruyen",
+        "type": "comic",
+        "locale": "vi_VN"
         }
     ]
 }

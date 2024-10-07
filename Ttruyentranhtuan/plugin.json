@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "name": "T-TruyenTranhTuan",
+    "author": "VbooksT",
+    "version": 1,
+    "source": "http://truyentuan.xyz",
+    "regexp": "(truyentuan|truyentranhtuan).xyz/(.*?)",
+    "description": "Đọc truyện trên trang http://truyentuan.xyz",
+    "locale": "vi_VN",
+    "language": "javascript",
+    "type": "comic"
+  },
+  "script": {
+    "home": "home.js",
+    "detail": "detail.js",
+    "search": "search.js",
+    "genre": "genre.js",
+    "toc": "toc.js",
+    "chap": "chap.js"
+  }
+}
