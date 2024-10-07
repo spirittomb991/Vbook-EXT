@@ -2,8 +2,8 @@
   "metadata": {
     "name": "T-Net Truyện",
     "author": "VbookT",
-    "version": 2,
-    "source": "https://www.nettruyenviet.com",
+    "version": 3,
+    "source": "https://nettruyenviet.com",
     "regexp": "(www.)?(nhattruyen|nettruyen|nettruyentop|nettruyenvip|nettruyenpro|nettruyengo|nettruyenmoi|nettruyenone|nettruyenco|nettruyenme|nettruyenin|nettruyenon|nettruyentv|nettruyenmin|nettruyenking|nettruyenvi|nettruyenplus|nettruyenmax).(com|vn)/truyen-tranh/[^/]+/?$",
     "description": "Đọc truyện trên trang Net Truyện",
     "locale": "vi_VN",
