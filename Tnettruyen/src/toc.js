@@ -5,7 +5,7 @@ function execute(url) {
 
     if (response.ok) {
         let doc = response.html();
-        let el = doc.select("div.list-chapter li.row .chapter a");
+        let el = doc.select("div.list-chapter ul.row .chapter a");
         const data = [];
         for (let i = el.size() - 1; i >= 0; i--) {
             let e = el.get(i);
