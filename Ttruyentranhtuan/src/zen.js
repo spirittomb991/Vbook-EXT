@@ -8,7 +8,7 @@ function execute(url, page) {
                 name: e.select("span.manga").first().text(),
                 link: e.select("a").first().attr("href"),
                 description: e.select("span.chapter").text().trim() +" / "+ e.select("span.current-date").text().trim(),
-                host: "http://truyentuan.com"
+                host: "http://truyentuan.xyz"
             })
         });
         return Response.success(data)

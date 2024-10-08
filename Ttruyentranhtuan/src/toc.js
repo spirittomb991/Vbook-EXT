@@ -1,5 +1,5 @@
 function execute(url) {
-    url = url.replace("truyentuan.xyz", "truyentuan.com");
+    url = url.replace("truyentuan.xyz", "truyentuan.xyz");
     let response = fetch(url);
     if (response.ok) {
         let doc = response.html();
@@ -10,7 +10,7 @@ function execute(url) {
             data.push({
                 name: e.select("a").text(),
                 url: e.attr("href"),
-                host: "http://truyentuan.com"
+                host: "http://truyentuan.xyz"
             })
         }
         data.reverse()

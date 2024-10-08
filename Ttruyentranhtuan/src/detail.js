@@ -1,5 +1,5 @@
 function execute(url) {
-    url = url.replace("truyentuan.xyz", "truyentuan.com");
+    url = url.replace("truyentuan.xyz", "truyentuan.xyz");
     let response = fetch(url);
     if (response.ok) {
         let doc = response.html();
@@ -11,7 +11,7 @@ function execute(url) {
             author: author,
             description: doc.select("#manga-summary").first().html(),
             detail: doc.select(".misc-infor").html(),
-            host: "http://truyentuan.com",
+            host: "http://truyentuan.xyz",
             ongoing: doc.select("p.misc-infor").last().text().indexOf("Đang tiến hành") >= 0
         });
     }
