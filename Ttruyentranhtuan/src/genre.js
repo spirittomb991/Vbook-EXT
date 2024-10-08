@@ -1,11 +1,11 @@
 function execute() {
-    let response = fetch("http://truyentuan.xyz/danh-sach-truyen/the-loai/truyen-tranh-viet-nam");
+    let response = fetch("https://truyentuan.xyz/danh-sach-category");
     if (response.ok) {
         let doc = response.html();
         let menu = doc.select("section#category-list li a")
         var nav = []
         menu.forEach(e => {
-            let input = "http://truyentuan.xyz/" + e.select('a').attr("href");
+            let input = "http://truyentuan.xyz" + e.select('a').attr("href");
             nav.push({ 
                 title: e.text(), 
                 input: input, 
