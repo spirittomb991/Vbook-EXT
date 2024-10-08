@@ -2,7 +2,7 @@
   "metadata": {
     "name": "T-TruyenTranhTuan",
     "author": "VbooksT",
-    "version": 3,
+    "version": 4,
     "source": "http://truyentuan.xyz",
     "regexp": "(truyentuan|truyentranhtuan).xyz/(.*?)",
     "description": "Đọc truyện trên trang http://truyentuan.xyz",
