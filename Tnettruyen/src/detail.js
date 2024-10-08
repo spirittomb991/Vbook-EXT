@@ -6,6 +6,7 @@ function execute(url) {
     let response = fetch(url);
     if (response.ok) {
         let doc = response.html();
+        console.log(doc)
         let coverImg = doc.select(".detail-info img").first().attr("src");
         if (coverImg.startsWith("//")) {
             coverImg = "https:" + coverImg;
@@ -32,7 +33,6 @@ function execute(url) {
             description: doc.select(".detail-content p").html(),
             detail: detail,
             ongoing: doc.select(".detail-info .status").html().indexOf("Đang tiến hành") >= 0,
-            genres: genres,
             host: BASE_URL
         });
     }
