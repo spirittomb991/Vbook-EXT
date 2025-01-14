@@ -2,7 +2,7 @@
   "metadata": {
     "name": "T-Tang Thu Vien",
     "author": "VbookT",
-    "version": 1,
+    "version": 2,
     "source": "https://tangthuvien.net/",
     "regexp": "https://tangthuvien.net/.*",
     "description": "Extension for Tang Thu Vien",

@@ -4,7 +4,7 @@ function execute(url) {
         var doc = response.html();
         var chapters = [];
         
-        doc.select(".chapter-list .chapter-item").forEach(e => {
+        doc.select(".chapter-list a").forEach(e => {
             chapters.push({
                 name: e.text(),
                 url: e.attr("href")
