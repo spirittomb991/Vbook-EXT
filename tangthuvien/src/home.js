@@ -1,6 +1,10 @@
+load("config.js");
+
 function execute() {
     return Response.success([
-        {title: "Hot", input: "https://tangthuvien.net/tong-hop?rank=vw&time=m", script: "homecontent.js"},
-        {title: "New", input: "https://tangthuvien.net/tong-hop?ord=new", script: "homecontent.js"}
+        { title: "Xem nhiều", script: "gen.js", input: BASE_URL + "/tong-hop?rank=vw" },
+        { title: "Đề cử", script: "gen.js", input: BASE_URL + "/tong-hop?rank=nm" },
+        { title: "Bình luận nhiều", script: "gen.js", input: BASE_URL + "/tong-hop?rank=bl" },
+        { title: "Theo dõi nhiều", script: "gen.js", input: BASE_URL + "/tong-hop?rank=td" }
     ]);
 }

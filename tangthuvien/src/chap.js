@@ -1,9 +1,10 @@
 function execute(url) {
-    var response = fetch(url);
-    if (response.ok) {
-        var doc = response.html();
-        var content = doc.select(".chapter-content").html();
-        return Response.success(content);
+    var htm = Http.get(url).string();
+    if (htm) {
+        var doc = Html.parse(htm.replace(new RegExp('\r?\n','g'), "<br />"));
+        if (doc) {
+            return Response.success(doc.select("div.box-chap").first().html());
+        }
     }
     return null;
 }

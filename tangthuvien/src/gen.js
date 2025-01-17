@@ -1,13 +1,9 @@
-load("config.js");
-function execute(key, page) {
+load('config.js');
+function execute(url, page) {
     if (!page) page = '1';
-    let response = fetch(BASE_URL + "/ket-qua-tim-kiem", {
-        method: "GET",
-        queries: {
-            term: key,
-            page: page
-        }
-    });
+
+    let response = fetch(url + "&page=" + page);
+
     if (response.ok) {
         let doc = response.html();
         let novelList = [];

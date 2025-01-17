@@ -1,17 +1,22 @@
+load("config.js");
 function execute(url) {
-    var response = fetch(url);
+    let response = fetch(url);
     if (response.ok) {
-        var doc = response.html();
-        var chapters = [];
-        
-        doc.select(".chapter-list a").forEach(e => {
-            chapters.push({
-                name: e.text(),
-                url: e.attr("href")
+        let doc = response.html();
+        let id = doc.select("input[name=story_id]").attr("value");
+        response = fetch(BASE_URL + "/story/chapters?story_id=" + id);
+        if (response.ok) {
+            doc = response.html();
+            let list = [];
+            doc.select("li a").forEach(e => {
+                list.push({
+                    name: e.text(),
+                    url: e.attr("href"),
+                    host: BASE_URL
+                });
             });
-        });
-
-        return Response.success(chapters);
+            return Response.success(list);
+        }
     }
     return null;
 }
