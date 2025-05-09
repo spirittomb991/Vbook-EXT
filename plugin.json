@@ -1,0 +1,100 @@
+{
+  "metadata": {
+    "author": "VbooksT",
+    "description": "Không biết gì ^^!"
+  },
+  "data": [
+        {
+        "name": "T-LxHentaiT",
+        "author": "VbooksT",
+        "path": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Tlxhentai/plugin.zip",
+        "version": 3,
+        "source": "https://lxmanga.click",
+        "icon": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Tlxhentai/plugin.zip",
+        "description": "Đọc truyện trên trang Lxhentai",
+        "tag": "nsfw",
+        "type": "comic",
+        "locale": "vi_VN"
+        },
+         {
+        "name": "T-HentaiVN",
+        "author": "VbooksT",
+        "path": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Thentaivn/plugin.zip",
+        "version": 3,
+        "source": "https://hentaiayame.net",
+        "icon": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Thentaivn/plugin.zip",
+        "description": "Đọc truyện trên trang HentaVN",
+        "tag": "nsfw",
+        "type": "comic",
+        "locale": "vi_VN"
+        },
+         {
+        "name": "T-nHentai",
+        "author": "VbooksT",
+        "path": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Tnhentai/plugin.zip",
+        "version": 1,
+        "source": "https://nhentai.website",
+        "icon": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Tnhentai/plugin.zip",
+        "description": "Đọc truyện trên trang nHentai",
+        "tag": "nsfw",
+        "type": "comic",
+        "locale": "vi_VN"
+        },
+         {
+        "name": "T-HentaiCube",
+        "author": "VbooksT",
+        "path": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Thentaicube/plugin.zip",
+        "version": 3,
+        "source": "https://hentaicb.lol",
+        "icon": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Thentaicube/plugin.zip",
+        "description": "Đọc truyện trên trang Hentai Cube",
+        "tag": "nsfw",
+        "type": "comic",
+        "locale": "vi_VN"
+        },
+         {
+        "name": "T-TruyenTranhTuan",
+        "author": "VbooksT",
+        "path": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Ttruyentranhtuan/plugin.zip",
+        "version": 4,
+        "source": "https://truyentuan.xyz",
+        "icon": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Ttruyentranhtuan/plugin.zip",
+        "description": "Đọc truyện trên trang TruyenTranhTuan",
+        "type": "comic",
+        "locale": "vi_VN"
+        },
+         {
+        "name": "T-NetTruyen",
+        "author": "VbooksT",
+        "path": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Tnettruyen/plugin.zip",
+        "version": 7,
+        "source": "https://nettruyenww.com",
+        "icon": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Tnettruyen/plugin.zip",
+        "description": "Đọc truyện trên trang NetTruyen",
+        "type": "comic",
+        "locale": "vi_VN"
+        },
+         {
+        "name": "T-Tang Thu Vien",
+        "author": "VbooksT",
+        "path": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/tangthuvien/plugin.zip",
+        "version": 2,
+        "source": "https://tangthuvien.net",
+        "icon": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/tangthuvien/plugin.zip",
+        "description": "Đọc truyện trên trang Tang Thu Vien",
+        "type": "comic",
+        "locale": "vi_VN"
+        },
+         {
+        "name": "T-Trum Truyen",
+        "author": "VbooksT",
+        "path": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/trumtruyen/plugin.zip",
+        "version": 1,
+        "source": "https://tangthuvien.net",
+        "icon": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/trumtruyen/plugin.zip",
+        "description": "Đọc truyện trên trang Trum Truyen",
+        "type": "comic",
+        "locale": "vi_VN"
+        }
+    ]
+}
