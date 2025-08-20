@@ -2,11 +2,10 @@ function execute(url, page) {
   var response = fetch(url);
   var doc = response.html();
   var list = [];
-  doc.select('.list-story-homepage .book-item a.thumb').forEach(function(a) {
-    var parent = a.parent();
-    var name = parent.select('.name-book').text();
-    var link = a.attr('href');
-    var cover = a.select('img').attr('data-src');
+  doc.select('.list-story-homepage .book-item').forEach(function(item) {
+    var name = item.select('.name-book').text() || '';
+    var link = item.select('a.thumb').attr('href') || '';
+    var cover = item.select('img').attr('data-src') || item.select('img').attr('src') || '';
     list.push({
       name: name,
       link: link,
