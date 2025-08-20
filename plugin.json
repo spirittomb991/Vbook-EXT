@@ -96,5 +96,17 @@
         "type": "comic",
         "locale": "vi_VN"
         }
+    ,
+    {
+      "name": "Metruyenhot",
+      "author": "VbooksT",
+      "path": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Metruyenhot/plugin.zip",
+      "version": 1,
+      "source": "https://metruyenhot.vn",
+      "icon": "https://raw.githubusercontent.com/spirittomb991/Vbook-EXT/master/Metruyenhot/icon.png",
+      "description": "Đọc truyện trên trang Metruyenhot.vn",
+      "type": "comic",
+      "locale": "vi_VN"
+    }
     ]
 }
