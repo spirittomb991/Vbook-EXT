@@ -1,10 +1,16 @@
+load('config.js');
 function execute() {
     return Response.success([
-        {title: "Cập nhật", input: "https://hentaicube.xyz", script: "gen.js"},
-        {title: "Truyện Mới", input: "https://hentaicube.xyz/read/?m_orderby=new-manga", script: "gen.js"},
-        {title: "Truyện Update", input: "https://hentaicube.xyz/read/?m_orderby=latest", script: "gen.js"},
-        {title: "Trending", input: "https://hentaicube.xyz/read/?m_orderby=trending", script: "gen.js"},
-        {title: "Đọc nhiều", input: "https://hentaicube.xyz/read/?m_orderby=views", script: "gen.js"},
-        {title: "Hoàn Thành", input: "https://hentaicube.xyz/?s=&post_type=wp-manga&genre%5B%5D=series&op=1&author=&status%5B%5D=end", script: "gen.js"},
+        {title: "Cập nhật", input: BASE_URL, script: "gen.js"},
+        // Sắp xếp
+        {title: "Trending", input: BASE_URL + "/read/?m_orderby=trending", script: "gen.js"},
+        {title: "Đọc nhiều nhất", input: BASE_URL + "/read/?m_orderby=views", script: "gen.js"},
+        // Thể loại
+        {title: "Truyện Ngắn", input: BASE_URL + "/theloai/oneshot/", script: "gen.js"},
+        {title: "Truyện dài", input: BASE_URL + "/theloai/series/", script: "gen.js"},
+        {title: "Truyện Màu", input: BASE_URL + "/theloai/full-color/", script: "gen.js"},
+        {title: "Không Che", input: BASE_URL + "/theloai/khong-che/", script: "gen.js"},
+        {title: "Webtoon", input: BASE_URL + "/theloai/webtoon/", script: "gen.js"},
+        {title: "Manhwa", input: BASE_URL + "/theloai/manhwa/", script: "gen.js"},
     ]);
 }
