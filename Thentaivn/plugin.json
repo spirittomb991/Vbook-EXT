@@ -2,7 +2,7 @@
   "metadata": {
     "name": "T-HentaiVN",
     "author": "vBookT",
-    "version": 6,
+    "version": 7,
     "source": "https://hentaivnx.us",
     "regexp": "(www.)?hentaivnx.[a-z]+/\\d+-[^/]+.us$",
     "description": "Đọc truyện trên trang HentaiVN",
