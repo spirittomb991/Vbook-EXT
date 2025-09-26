@@ -3,7 +3,7 @@
     "name": "T-Hentai Cube",
     "author": "VbookT",
     "version": 7,
-    "source": "https://hentaicube.xyz",
+    "source": "https://hentaicube",
     "regexp": "(www.)?hentaicube.xyz/manga/.*",
     "description": "V1 : TEST",
     "locale": "vi-VN",
