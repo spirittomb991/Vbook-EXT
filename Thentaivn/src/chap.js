@@ -11,12 +11,13 @@ function execute(url) {
     if (response.ok) {
         let doc = response.html();
         let data = [];
-        doc.select("#image img").forEach(e => {
-            data.push(e.attr("data-src"));
+        // Lấy tất cả ảnh trong các page-chapter
+        doc.select(".reading-detail.box_doc .page-chapter img").forEach(e => {
+            let src = e.attr("src");
+            if (src) data.push(src);
         });
         return Response.success(data);
     }
 
     return null;
-
 }

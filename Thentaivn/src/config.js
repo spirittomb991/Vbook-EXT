@@ -1,7 +1,6 @@
-let BASE_URL = 'https://hentaiayame.net';
+let BASE_URL = 'https://www.hentaivnx.us';
 try {
     if (CONFIG_URL) {
         BASE_URL = CONFIG_URL;
     }
-} catch (error) {
-}
+} catch (error) {}

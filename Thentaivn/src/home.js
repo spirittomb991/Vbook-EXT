@@ -1,10 +1,10 @@
 load('config.js');
 function execute() {
     return Response.success([
-        {title: "Truyện mới", input: BASE_URL + "/danh-sach.html", script: "gen.js"},
-        {title: "Chương mới", input: BASE_URL + "/chap-moi.html", script: "gen.js"},
-        {title: "Full màu", input: BASE_URL + "/the-loai-37-full_color.html", script: "gen.js"},
-        {title: "Series", input: BASE_URL + "/the-loai-87-series.html", script: "gen.js"},
-        {title: "Không che", input: BASE_URL + "/the-loai-99-khong_che.html", script: "gen.js"}
+        {title: "Trang chủ", input: "https://www.hentaivnx.us", script: "gen.js"},
+        {title: "Truyện mới", input: "https://www.hentaivnx.us/tim-truyen", script: "gen.js"},
+        {title: "Không che", input: "https://www.hentaivnx.us/tim-truyen/khong-che", script: "gen.js"},
+        {title: "Truyện màu", input: "https://www.hentaivnx.us/tim-truyen/truyen-mau", script: "gen.js"},
+        {title: "Series", input: "https://www.hentaivnx.us/tim-truyen/series", script: "gen.js"}
     ]);
 }
