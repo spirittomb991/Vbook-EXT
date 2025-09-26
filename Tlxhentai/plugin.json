@@ -3,7 +3,7 @@
     "name": "T-LxHentaiT",
     "author": "VbookT",
     "version": 3,
-    "source": "https://lxmanga.click",
+    "source": "https://lxmanga.my",
     "regexp": "(www.)?(lxmanga|lxhentai).*?/truyen/.*",
     "description": "Đọc truyện trên trang lxmanga.click",
     "locale": "vi-VN",

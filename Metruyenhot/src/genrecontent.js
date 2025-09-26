@@ -4,9 +4,10 @@ function execute(url, page) {
   var list = [];
   doc.select('.list-story-homepage .book-item a.thumb').forEach(function(a) {
     var parent = a.parent();
-    var name = parent.select('.name-book').text();
-    var link = a.attr('href');
-    var cover = a.select('img').attr('data-src');
+    var name = parent.select('.name-book').text() || '';
+    var link = a.attr('href') || '';
+    if (link && link.indexOf('http') !== 0) link = 'https://metruyenhot.me' + link;
+    var cover = a.select('img').attr('data-src') || a.select('img').attr('src') || '';
     list.push({
       name: name,
       link: link,
