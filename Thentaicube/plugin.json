@@ -2,9 +2,9 @@
   "metadata": {
     "name": "T-Hentai Cube",
     "author": "VbookT",
-    "version": 6,
-    "source": "https://hentaicb.help",
-    "regexp": "(www.)?hentaicb.help/read/.*",
+    "version": 7,
+    "source": "https://hentaicube.xyz",
+    "regexp": "(www.)?hentaicube.xyz/manga/.*",
     "description": "V1 : TEST",
     "locale": "vi-VN",
     "language": "javascript",
