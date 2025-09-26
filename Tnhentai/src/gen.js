@@ -9,12 +9,21 @@ function execute(url, page) {
     const data = [];
     for (var i = 0; i < el.size(); i++) {
         var e = el.get(i);
+        // Sửa lấy ảnh đúng từ thẻ img bên trong a.cover
+        var img = e.select("a.cover img").first();
+        var cover = "";
+        if (img) {
+            cover = img.attr("data-src");
+            if (cover.startsWith("//")) {
+                cover = "https:" + cover;
+            }
+        }
         data.push({
             name: e.select(".caption").first().text(),
             link: e.select("a").first().attr("href"),
-            cover: e.select("img").first().attr("data-src"),
+            cover: cover,
             description: e.select(".chapter a").first().text(),
-            host: "https://nhentai.website"
+            host: "https://nhentai.net"
         })
     }
 
