@@ -4,7 +4,7 @@ function _normalizeUrl(u) {
     if (!u) return BASE_URL + "/";
     u = ("" + u).trim();
 
-    // nếu có nhiều "https://" do ghép sai -> lấy từ lần xuất hiện cuối cùng
+    // Nếu có nhiều "http" do ghép sai -> lấy từ lần xuất hiện cuối cùng
     var idx = u.indexOf("http");
     if (idx !== -1) {
         var second = u.indexOf("http", idx + 1);
@@ -22,57 +22,46 @@ function safeText(sel) {
 }
 
 function execute(url, page) {
-    if (!page) page = '1';
-
+    page = page || '1';
     try {
         url = _normalizeUrl(url);
 
         var doc = Http.get(url).params({ "page": page }).html();
         if (!doc) return Response.error("Không load được HTML: " + url);
 
-        // lấy next page number (text "2"...) hoặc href fallback
-        var next = doc.select(".pagination a.current + a").text();
+        // Lấy next page number từ pagination
+        var next = "";
+        var nextSel = doc.select(".pagination a.current + a");
+        if (nextSel && nextSel.size() > 0) next = nextSel.text();
         if (!next) {
-            var nextHref = doc.select(".pagination a.current + a").attr("href");
-            if (!nextHref) {
-                nextHref = doc.select(".pagination a[rel=next]").attr("href");
-            }
+            var nextHref = doc.select(".pagination a[rel=next]").attr("href");
             if (nextHref) {
-                // lấy page param từ href nếu có ?page=...
                 var m = nextHref.match(/page=(\d+)/);
                 if (m) next = m[1];
             }
         }
 
-        var el = doc.select(".gallery"); // chọn trực tiếp gallery nodes
-
+        // Lấy gallery nodes
+        var el = doc.select(".gallery");
         var data = [];
-        for (var i = 0; i < el.size(); i++) {
-            var e = el.get(i);
 
-            // cover: nhiều site dùng data-src hoặc src
+        el.forEach(e => {
             var img = e.select("a.cover img").first();
             var cover = "";
             if (img) {
                 cover = img.attr("data-src") || img.attr("src") || "";
-                if (cover && cover.indexOf("//") === 0) cover = "https:" + cover;
+                if (cover && cover.startsWith("//")) cover = "https:" + cover;
             }
 
-            // name
-            var name = safeText(e.select(".caption").first());
+            // Name
+            var name = safeText(e.select(".caption").first()) || "";
 
-            // link: muốn trả path (ví dụ "/g/123456/") để detail.js xử lý đều được
+            // Link
             var href = e.select("a").first().attr("href") || "";
-            // nếu là absolute -> convert thành path
-            if (href.indexOf("http") === 0) {
-                try {
-                    var tmp = href.replace(BASE_URL, "");
-                    if (!tmp.startsWith("/")) tmp = "/" + tmp;
-                    href = tmp;
-                } catch (e) {}
-            }
+            if (href.startsWith(BASE_URL)) href = href.replace(BASE_URL, "");
+            if (!href.startsWith("/")) href = "/" + href;
 
-            // pages từ title của ảnh (nếu có): "Title (123 pages)"
+            // Pages từ title attribute
             var pages = "";
             if (img) {
                 var titleAttr = img.attr("title") || "";
@@ -87,7 +76,7 @@ function execute(url, page) {
                 description: pages,
                 host: BASE_URL
             });
-        }
+        });
 
         return Response.success(data, next || '');
     } catch (err) {

@@ -13,7 +13,9 @@ function _normalizeUrl(u) {
     return BASE_URL + "/" + u;
 }
 
-function safeText(sel) { return sel && sel.text ? sel.text().trim() : ""; }
+function safeText(sel) {
+    return sel && sel.text ? sel.text().trim() : "";
+}
 
 function execute(url) {
     try {
@@ -21,27 +23,37 @@ function execute(url) {
         var doc = Http.get(url).html();
         if (!doc) return Response.error("Không lấy được detail HTML: " + url);
 
-        // cover
+        // Cover
         var img = doc.select("#cover img").first();
         var cover = "";
         if (img) {
             cover = img.attr("data-src") || img.attr("src") || "";
-            if (cover && cover.indexOf("//") === 0) cover = "https:" + cover;
+            if (cover && cover.startsWith("//")) cover = "https:" + cover;
         }
 
+        // Name
         var name = safeText(doc.select(".title .pretty")) || safeText(doc.select("h1"));
+
+        // Author / Artist
         var author = safeText(doc.select("a[href^='/artist/'] .name")) || safeText(doc.select("a[href^='/artist/']"));
         if (!author) author = "";
 
-        var description = safeText(doc.select("h2"));
+        // Description
+        var description = safeText(doc.select("h2")) || "";
 
-        // get gallery id from url (/g/123456/)
-        var m = url.match(/\/g\/(\d+)\/?/);
-        var gid = m ? m[1] : "";
+        // Gallery ID
+        var gidMatch = url.match(/\/g\/(\d+)\/?/);
+        var gid = gidMatch ? gidMatch[1] : "";
 
-        var detailText = safeText(doc.select(".tag-container"));
+        // Tags / detail
+        var detailText = [];
+        var tags = doc.select(".tag-container a.tag");
+        if (tags && tags.size() > 0) {
+            tags.forEach(t => detailText.push(safeText(t)));
+        }
+        detailText = detailText.join(", ");
 
-        // Chapter list: single chapter that points to gallery path
+        // Chapter list (single)
         var chapterUrl = "/g/" + gid + "/";
         return Response.success({
             name: name,

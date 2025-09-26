@@ -1,45 +1,31 @@
 function execute(url) {
-    try {
-        // Thêm https nếu url chưa có
-        if (url.indexOf("http") !== 0) url = "https:" + url;
+    let response = fetch(url);
+    if (!response.ok) return null;
 
-        // Lấy HTML với header chuẩn để tránh SSL handshake aborted
-        let html = Http.get(url, {
-            headers: {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-            }
-        }).string();
+    let doc = response.html();
+    let thumbs = doc.select("div#thumbnail-container div.thumb-container a");
+    thumbs.select("noscript").remove();
 
-        // Chọn tất cả img trong thumbnail-container
-        let regex = /<div class="thumb-container">[\s\S]*?<img[^>]+data-src="([^"]+)"/g;
-        let data = [];
-        let m;
-        while ((m = regex.exec(html)) !== null) {
-            let src = m[1]; // URL gốc từ data-src
+    // Lấy media server nếu có
+    let mediaServerMatch = /media_server\s*:\s*(\d+)/.exec(doc.html());
+    let mediaServer = mediaServerMatch ? mediaServerMatch[1] : null;
 
-            // Thêm https:
-            if (src.indexOf("http") !== 0) src = "https:" + src;
+    let data = [];
+    thumbs.forEach(e => {
+        let img = e.select("img");
+        let src = img.attr("data-src") || img.attr("data-srcset");
+        if (!src) return;
 
-            // Chuyển tX -> iX
-            src = src.replace(/\/\/t(\d+)\.nhentai\.net/, "//i$1.nhentai.net");
+        if (src.startsWith("//")) src = "https:" + src;
 
-            // Xóa t cuối cùng trước phần mở rộng
-            src = src.replace(/(\d+)t(\.\w+)$/, "$1$2");
+        // Đổi domain t* thành i*
+        src = src.replace(/https:\/\/t(\d)\.nhentai\.net/, "https://i$1.nhentai.net");
 
-            // Xóa đuôi kép nếu có (.jpg.webp -> .jpg)
-            src = src.replace(/(\.\w+)\.(\w+)$/, "$1");
+        // Xử lý các trường hợp 1t.jpg.webp hoặc 1t.webp → 1.jpg / 1.webp
+        src = src.replace(/\/(\d+)t(\.\w+)(\.\w+)?$/, "/$1$2");
 
-            // Loại bỏ thumb.jpg / cover.jpg
-            if (src.match(/\/thumb\.|\/cover\./)) continue;
+        data.push(src);
+    });
 
-            data.push(src);
-        }
-
-        if (!data.length) return Response.error("Không tìm thấy ảnh trong gallery");
-
-        return Response.success(data);
-    } catch (err) {
-        return Response.error("chap.js error: " + err);
-    }
+    return Response.success(data);
 }
