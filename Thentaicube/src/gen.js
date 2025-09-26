@@ -1,18 +1,34 @@
 load('config.js');
 function execute(url, page) {
     if (!page) page = '1';
-    const doc = fetch(url + "/page" + page).html();
+    let pageUrl;
+    if (url.includes('?')) {
+        pageUrl = url + '&page=' + page;
+    } else {
+        pageUrl = url + '/page' + page;
+    }
+    const doc = fetch(pageUrl).html();
     var next = doc.select(".wp-pagenavi").select("span.current + a").text()
-    const el = doc.select("div.page-item-detail")
+    let el = doc.select("div.page-item-detail");
+    if (el.size() === 0) {
+        el = doc.select("div.c-tabs-item__content");
+    }
     const data = [];
     for (var i = 0; i < el.size(); i++) {
         var e = el.get(i);
         let img = e.select("a img").first().attr("data-src") || e.select("a img").first().attr("src");
+        let name = e.select("h3 a").first().text();
+        let link = e.select("a").first().attr("href");
+        let desc = e.select(".chapter a").first().text();
+        // Nếu không có .chapter, lấy chap mới nhất từ .tab-meta .chapter
+        if (!desc) {
+            desc = e.select(".tab-meta .chapter a").first().text();
+        }
         data.push({
-            name: e.select("h3 a").first().text(),
-            link: e.select("a").first().attr("href"),
+            name: name,
+            link: link,
             cover: img,
-            description: e.select(".chapter a").first().text(),
+            description: desc,
             host: BASE_URL
         })
     }
