@@ -2,17 +2,20 @@
   "metadata": {
     "name": "T-nHentai",
     "author": "VbooksT",
-    "version": 2,
+    "version": 3,
     "source": "https://nhentai.net",
     "regexp": "(www.)?nhentai.net/g/\\d+/?$",
     "description": "Đọc truyện trên trang nHentai",
     "locale": "locale",
     "language": "javascript",
     "type": "comic",
-    "tag": "nsfw"
+    "tag": "nsfw",
+    "BASE_URL": "https://nhentai.net"
   },
   "script": {
     "home": "home.js",
+    "genre": "genre.js",
+    "genre2": "genre2.js",
     "detail": "detail.js",
     "search": "search.js",
     "toc": "toc.js",
