@@ -1,30 +1,43 @@
 function execute(url) {
-    let response = fetch(url);
-    if (!response.ok) return null;
+    let maxDocRetry = 2;
+    let doc = null;
 
-    let doc = response.html();
+    // Retry fetch document 1–2 lần
+    for (let i = 0; i <= maxDocRetry; i++) {
+        try {
+            let response = fetch(url);
+            if (!response.ok) continue;
+            doc = response.html();
+            if (doc) break;
+        } catch (err) {
+            if (i === maxDocRetry) return Response.error("chap.js fetch failed: " + err);
+        }
+    }
+    if (!doc) return Response.error("chap.js could not load document");
+
     let thumbs = doc.select("div#thumbnail-container div.thumb-container a");
     thumbs.select("noscript").remove();
 
-    // Lấy media server nếu có
-    let mediaServerMatch = /media_server\s*:\s*(\d+)/.exec(doc.html());
-    let mediaServer = mediaServerMatch ? mediaServerMatch[1] : null;
-
     let data = [];
+
     thumbs.forEach(e => {
-        let img = e.select("img");
-        let src = img.attr("data-src") || img.attr("data-srcset");
-        if (!src) return;
+        try {
+            let img = e.select("img");
+            let src = img.attr("data-src") || img.attr("data-srcset");
+            if (!src) return;
 
-        if (src.startsWith("//")) src = "https:" + src;
+            if (src.startsWith("//")) src = "https:" + src;
 
-        // Đổi domain t* thành i*
-        src = src.replace(/https:\/\/t(\d)\.nhentai\.net/, "https://i$1.nhentai.net");
+            // Đổi domain t* → i* (giảm redirect / handshake fail)
+            src = src.replace(/https:\/\/t(\d)\.nhentai\.net/, "https://i$1.nhentai.net");
 
-        // Xử lý các trường hợp 1t.jpg.webp hoặc 1t.webp → 1.jpg / 1.webp
-        src = src.replace(/\/(\d+)t(\.\w+)(\.\w+)?$/, "/$1$2");
+            // 1t.jpg.webp hoặc 1t.webp → 1.jpg / 1.webp
+            src = src.replace(/\/(\d+)t(\.\w+)(\.\w+)?$/, "/$1$2");
 
-        data.push(src);
+            data.push(src);
+        } catch (errImg) {
+            // bỏ ảnh lỗi, không ảnh hưởng toàn bộ
+        }
     });
 
     return Response.success(data);
