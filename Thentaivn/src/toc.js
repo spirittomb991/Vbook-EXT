@@ -17,9 +17,13 @@ function execute(url) {
         }
         for (let i = el.size() - 1; i >= 0; i--) {
             let e = el.get(i);
+            let chapUrl = e.attr("href");
+            if (chapUrl && !chapUrl.startsWith("http")) {
+                chapUrl = BASE_URL + chapUrl;
+            }
             data.push({
                 name: e.text(),
-                url: e.attr("href"),
+                url: chapUrl,
                 host: BASE_URL
             });
         }

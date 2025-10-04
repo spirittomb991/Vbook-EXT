@@ -13,7 +13,13 @@ function execute(key, page) {
             let e = el.get(i);
             let name = e.select("h3 a").text();
             let link = e.select("h3 a").attr("href");
+            if (link && !link.startsWith("http")) {
+                link = BASE_URL + link;
+            }
             let cover = e.select(".image img").attr("src");
+            if (cover && !cover.startsWith("http")) {
+                cover = BASE_URL + cover;
+            }
             data.push({
                 name: name,
                 link: link,

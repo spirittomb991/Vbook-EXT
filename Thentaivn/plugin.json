@@ -4,7 +4,7 @@
     "author": "vBookT",
     "version": 7,
     "source": "https://hentaivnx.us",
-    "regexp": "(www.)?hentaivnx.[a-z]+/\\d+-[^/]+.us$",
+    "regexp": "https?://(www\\.)?hentaivnx\\.us/truyen-hentai/[^/]+-\\d+",
     "description": "Đọc truyện trên trang HentaiVN",
     "locale": "vi_VN",
     "language": "javascript",
