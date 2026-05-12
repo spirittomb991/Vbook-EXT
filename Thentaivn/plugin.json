@@ -2,8 +2,8 @@
   "metadata": {
     "name": "T-HentaiVN",
     "author": "vBookT",
-    "version": 8,
-    "source": "https://hentaivnx.us",
+    "version": 9,
+    "source": "https://hentaivnx.com",
     "regexp": "https?://(www\\.)?hentaivnx\\.us/truyen-hentai/[^/]+-\\d+",
     "description": "Đọc truyện trên trang HentaiVN",
     "locale": "vi_VN",

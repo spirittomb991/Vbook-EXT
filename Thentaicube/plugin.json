@@ -2,8 +2,8 @@
   "metadata": {
     "name": "T-Hentai Cube",
     "author": "VbookT",
-    "version": 8,
-    "source": "https://hentaicube",
+    "version": 9,
+    "source": "https://hentaicube.xyz",
     "regexp": "(www.)?hentaicube.xyz/manga/.*",
     "description": "V1 : TEST",
     "locale": "vi-VN",

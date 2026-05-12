@@ -2,9 +2,9 @@
   "metadata": {
     "name": "T-NetTruyen",
     "author": "VbooksT",
-    "version": 7,
-    "source": "https://nettruyenww.com",
-    "regexp": "(www.)?nettruyenww.com/truyen-tranh/[^/]+/?$",
+    "version": 8,
+    "source": "https://nettruyen.gg",
+    "regexp": "(www.)?nettruyen.gg/truyen-tranh/[^/]+/?$",
     "description": "Đọc truyện trên trang NetTruyen",
     "locale": "vi_VN",
     "language": "javascript",
