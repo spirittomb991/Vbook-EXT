@@ -1,0 +1,23 @@
+{
+    "metadata": {
+        "name": "T-VinaHentai",
+        "author": "VbooksT",
+        "version": 1,
+        "source": "https:\/\/vinahentai.life",
+        "regexp": "https?:\/\/(?:www\\.)?vinahentai\\.[a-z]+\/truyen-hentai\/[^?&\/]+\/?$",
+        "description": "Đọc truyện trên trang vinahentai.life",
+        "locale": "vi_VN",
+        "type": "comic",
+        "tag": "nsfw",
+        "language": "javascript",
+        "encrypt": true
+    },
+    "script": {
+        "detail": "detail.js",
+        "toc": "toc.js",
+        "chap": "chap.js",
+        "search": "search.js",
+        "home": "home.js",
+        "genre": "genre.js"
+    }
+} 
