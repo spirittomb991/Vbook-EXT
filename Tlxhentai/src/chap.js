@@ -12,15 +12,19 @@ function execute(url) {
     var doc = response.html();
     var imgs = [];
 
-    // Ảnh thật nằm trong div.lazy (data-src)
-    var el = doc.select("div.lazy[data-src]");
-
-    for (var i = 0; i < el.size(); i++) {
-        var link = el.get(i).attr("data-src");
-        if (link && !link.includes("load.gif")) {
-            if (link.startsWith("//")) link = "https:" + link;
-            else if (link.startsWith("/")) link = BASE_URL + link;
-            imgs.push(link.trim());
+    // Tìm container chứa chapter content
+    var container = doc.select("div.page-chapter, div.chapter-content, div#chapter-content, div.story-content").first();
+    
+    if (container) {
+        // Lấy img trong container này
+        var el = container.select("img");
+        for (var i = 0; i < el.size(); i++) {
+            var link = el.get(i).attr("data-src") || el.get(i).attr("src");
+            if (link && !link.includes("gifs/") && !link.includes("load.gif") && !link.includes("data:image")) {
+                if (link.startsWith("//")) link = "https:" + link;
+                else if (link.startsWith("/")) link = BASE_URL + link;
+                imgs.push(link.trim());
+            }
         }
     }
 
