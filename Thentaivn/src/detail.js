@@ -51,8 +51,8 @@ function execute(url) {
         });
     });
 
-    // Lấy id từ url (/12345-ten-truyen/)
-    let idMatch = url.match(/\/(\d+)-/);
+    // Lấy id từ url (/truyen-hentai/ten-truyen-12345 hoặc /12345-ten-truyen/)
+    let idMatch = url.match(/-(\d+)(?:$|[\/?])/);
     let id = idMatch ? idMatch[1] : url;
 
     return Response.success({
