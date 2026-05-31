@@ -1,1 +1,31 @@
-1RNwgbDlCiEz0kByWZc9vK5IWPS2Uke8pytHVMRLGsuRGx9jzHenqgz5h09SyLCORzy3vxDbDgcQNvSW7ZW9UlMx0P1Xxx1z7ykx0P2Xx1k0G2NSx0P1XxbUI9CH7IL7VI3MN995EghVWs8czX7b8G8NLZZVVNEYzmkvNqzuAdJe0YoJJqbtER5kpMx0P1XxXO1L0wne1jx2TV7JuHEfDtjZfqSjQcBQFSAWSo5jMowVYgNAx0P1Xx12dALmx0P1Xxz9FcXlz4mI6s8pQyKZfi1jixE68qlu1j2s629cxGHKRFoPOv6yx0P2XxMarnxPwgmagwBZDla0Hsv3Kxs2sbegisrodC1wGfYhjx0P2XxyP7bUvx0P2Xxuh8x0P2Xx6uLMDfZx0P2XxpKqtiahkqVOkJpBwZG9x0P1Xx1t9elAFJwlBjpx0P2Xx2l71Hcv5zPxReDBVdfBQgtev55m2KoUItxoRAt26CmYK2kXE45jzfx0P1XxwYVAMw9Aj3ySj4O6deCOuU3KRlIMvi1JbSruhQaeFXj2lL4gvpL3x0P2Xx5Cr9JCBmRjdCjolki2mF7ix0P2Xx0CJAMHqx0P2XxB46JrrWdUo3qmY59hSSkPUxrvx0P2XxGIAONNdHuKRm2zaKHG1LcladvNHaJCflPXtylYox0P2XxsCLb2sY3H4x0P1XxTY10Z88JAktU4JMzBYux0P2Xxiay4P0uRq8cI5Lx0P1Xx4iUicwD5kzEuewKx0P1XxzOGmbzZTL17Dx0P1Xxemx0P1XxuQw3gFzFqDRLFiyKEEda7AMBu59YxV4B5qljFeX14x0P1Xx2sgBYFsMzAaG7S3JBHQkZjx0P1Xx9OTTcPyx0P2XxXywANvDc1N2x0P1XxvNVaEPm5WG0zx0P1XxCkST7Sg3iziorlvp72P85cg8R8hS9x0P2XxcnAjjOjTz5Rw7DIhRGxhXwH37Pqgut42ZfKN96nvU1a0rhqNDM9DbF1XFNin1cAxEiPWEcqYNCb3joiq5G6uNFr1lb3Jsqx0P1XxkO6iedFMocCqvZ3x0P2XxK2zuZZk2aT7dhqAx0P2XxuA5MjnLx0P1XxoZH2V5x0P1Xxx0P2XxDlwIx0P2XxG2QKBNLdg1wU6liNrgV7ZuRLRBSctaE4WRQ7sbvWjjR14x0P2XxME5imx0P2XxnvFjMx0P2XxiS1aJKFVF6pdx0P1XxHHFJfo8fHqNYLVG4HaeoVXwsecIfT6D19qKSJcXKytDEqQO3sMTPQQwjx9yoHjBiPNfaTEX8xq2KOJ8y5Q6jhihIUNSScUThG92KmunbRHRx0P1Xxx0P2XxjM1x0P1XxYdTJbzhmhxM3XWkPf2mVplBRnbDWvHubaGinx0P1XxRgaoGMx0P2XxYp68kdxGQEGqeCaOmbeRqIFFWG5ee991vPL8x0P2XxdYJEBx64i36HPlhplHt6heQvGLS0A7HAmXqx0P1XxtZVGBS6nKx0P1XxlOLs6x0P2XxxyhzWWd3LnAeyqIslym3HggDSpK4HAy1GNpBFefNPAw2IyAX527oWs7icsd0VO1x0P2XxxkhZAkz9RkFwyZx0P2XxoXQPx0P1XxVDUbZakFXRWzkqrGhp8I1AyxQuQyXutthfsx0P2XxE9y9hBkFK7w1ruThx0P2Xxtoqx0P2Xxamiimp6mrwCRWmKn
+load('config.js');
+
+function _normalizeUrl(u) {
+    if (!u) return BASE_URL + "/";
+    u = ("" + u).trim();
+    if (u.indexOf("http") === 0) return u;
+    if (u.indexOf("//") === 0) return "https:" + u;
+    if (u.indexOf("/") === 0) return BASE_URL + u;
+    return BASE_URL + "/" + u;
+}
+
+function execute(url) {
+    try {
+        url = _normalizeUrl(url);
+        var doc = Http.get(url).html();
+        if (!doc) return Response.error("Không lấy được TOC HTML: " + url);
+
+        // Most galleries are single-chapter; provide a single chapter pointing to the page
+        var chapters = [
+            {
+                name: "Read",
+                url: url,
+                host: BASE_URL
+            }
+        ];
+
+        return Response.success(chapters);
+    } catch (err) {
+        return Response.error("toc.js error: " + err);
+    }
+}

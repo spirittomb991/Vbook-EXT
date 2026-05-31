@@ -4,7 +4,7 @@
     "author": "VbookT",
     "version": 9,
     "source": "https://hentaicube.xyz",
-    "regexp": "(www.)?hentaicube.xyz/manga/.*",
+    "regexp": "(www\\.)?hentaicube\\.xyz/read/.*",
     "description": "V1 : TEST",
     "locale": "vi-VN",
     "language": "javascript",

@@ -1,1 +1,45 @@
-1RNwgbDlCiEz0kByWZc9vK5IWPS2Uke8pytHVMRLGstYNZ4va6yjx0P1XxgMvy09BNmpGEDjNLu3wONx0P1XxK7eJ2CPw7kQgcYSgzcPAOSOUxojXyNs2CnAx0P1XxjUKaQNP6jl9x0P1Xx5sgEYQcmRCGihMyMrmQDxHB0ALPmDX9jHVWxiTrdqAmNGnaVOLNn6lefzmwx0P2XxFPWR4dox0P2XxM7MDwidzcEObPrsXRHtGrzU6GApx0P1XxxvDIYhPlx0P2Xxe1laETXX1JYJXFbOawXbCxgi2uNdVAuQ7wAR1NghgmHXYFUsfLrZEQYXY9j5XEmHl1CiU5b38MwB9fdrpxYp6x0P2XxK0SmuyDBUkETKNAvQMTFx0P2XxTbQbzx0P1XxVGnxx0P1XxUiBmZGUddpyhmzfVykHy3zRMx5PDtfZSVisu6Uid6zgdZ64rOZx0P1XxmrdZyUTFBFsqec27ErT5FbyDv1EcF0q2fFNRHpNcVZok0rLAkdCwuVUpwRksrGYSQjdyeRa6tx0P1XxKfGN6x0P2XxtMRhC0iVINp3wE0IFjfDLJMj9ZniKVPwqOECCyQFtzbYVuML1DGhEx0P2XxQ90eqfYwnGTr8udKy0miWeSOOyu1FgUqsYrwufHAWHBU8SJ7Wpea2mbuzshJGm8adXnv8aU1iNNqk1aXoAZokdg1KYFmMUUBUZQ4Ig0Hh6OBrlRnZbASMlimuza9ieE49JrMixBiBdG6TUx0P1XxuNax0P2XxESTHdFg0jfXafYpOtBdctN2o6VwT6gIR9s8ywp9qcXWfV31zqfOTgxQVGXXUaIQwJouawfIrBuoVJx0P2XxvKn7u7lcEhR7kMpP2dR9muOpx0P2XxlgY4DoCDReVVufRjcSkHjaeXED4MvIzuvfB8g7Ct5O2KrTOwDmIVO9XSEOJQyfLU5hwamDA83lRQDVPGCc0l8VUKv8WqMWqUAq1Cpw2dciusAlnZM3qN1Gx0P1XxNQqwuZZ9DDOux0P2XxC8NUn46HjD754ax3s8gTI71RmIaZ1ui1Ix0P1XxT2uf832b1uomLRYMCr7TOW5wEyYmbWJVszSlAwL1dmFA5DNnC2ZcFKqi37CNqGan48iya47l2dIXrdfngQOzGAzzP57rXfNlIVcVvx0P1Xx1CPzH1Ch9F3DMCouvLx0P1Xx8du1A6lhpU5AP22Lqxw1MkKN7uFUY7m1wUzLcAnwxx0P2Xxan1zJIA5S7ireXx0P1Xx5V2wzDdtQiqmaC0Ba0k1Ejbjt7iSjZEuYx0P2XxdPl2WliKRH4xbfx0P2XxPxa0dJ5ZWzJfafi7TcGsLyPfHsMaV03NFhMQHpA9gVt1x0P2XxFcS7o7h6x0P1Xx5YlJXTJBMFn1KNwTSB1alpb4qr9YRMYL5kqi8bOYLMbeXTW4GrJSW8JBF0niL0j4t0Gx65x0P2Xxx6QsYDYva3lbMKWmFgXJk4IktWQBSoMxTfyuMcpYPq4UjsvNHMDZu1GRx0P1XxNSHuRAkY5KX1BvLx0P2Xx3Vx0yZFf8Fg8Lm3piwFGhzPpx0P1XxeAlrkSD7hHjMvTlyR2rkFTjx0P1XxAyrQn0xywR5sSx0P2XxLm6l67rJf2bAokmqd19sIQaBr1GjOS5Lp620x0P2XxDV32WI1Wd2SoM3S2cQDqnrFDBvgNIlQ2QHuzIx0P2Xxx0P2XxyxVxyvkith8j0tUfDr5GuEx0P2XxQKA4wblZlhhuNicCgyNBx0P2XxQp08arx0P2Xxl7AzdhlRZPxRxEFGSqJQ3MYfNKXGdxRGMGywuv6wDTv4rx0P2XxSGn6N0M11xYuuQx0P3Xxx0P3Xx
+load('config.js');
+
+function _normalizeUrl(u) {
+    if (!u) return BASE_URL + "/";
+    u = ("" + u).trim();
+    if (u.indexOf("http") === 0) return u;
+    if (u.indexOf("//") === 0) return "https:" + u;
+    if (u.indexOf("/") === 0) return BASE_URL + u;
+    return BASE_URL + "/" + u;
+}
+
+function safeText(sel) {
+    return sel && sel.text ? sel.text().trim() : "";
+}
+
+function execute(key, page) {
+    try {
+        var q = encodeURIComponent(key || "");
+        var searchUrl = BASE_URL + "/?s=" + q;
+        if (page && page > 1) searchUrl += "&paged=" + page;
+
+        var doc = Http.get(searchUrl).html();
+        if (!doc) return Response.error("Không lấy được trang tìm kiếm: " + searchUrl);
+
+        var items = [];
+        var posts = doc.select("article, .post, .search-result, .item-loop");
+        if (posts && posts.size() > 0) {
+            posts.forEach(p => {
+                try {
+                    var a = p.select("a").first();
+                    var url = a ? a.attr('href') : null;
+                    var title = safeText(p.select("h2, h3, .entry-title, .title").first()) || safeText(a);
+                    var img = p.select("img").first();
+                    var cover = img ? (img.attr('data-src') || img.attr('src') || '') : '';
+                    if (cover && cover.indexOf('//') === 0) cover = 'https:' + cover;
+                    if (url) items.push({name: title || '', url: url, cover: cover, host: BASE_URL});
+                } catch (e) {}
+            });
+        }
+
+        return Response.success({results: items, hasMore: false});
+    } catch (err) {
+        return Response.error("search.js error: " + err);
+    }
+}

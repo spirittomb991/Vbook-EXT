@@ -1,6 +1,6 @@
 load('config.js')
 function execute(url) {
-    const doc = fetch(url).html()
+    var doc = fetch(url).html();
     return Response.success({
         name: doc.select("h1").text().replace(/NEW |Ongoing /gi,''),
         cover: doc.select(".summary_image img").first().attr("src"),

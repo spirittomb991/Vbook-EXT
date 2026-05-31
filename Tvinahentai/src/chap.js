@@ -1,1 +1,65 @@
-1RNwgbDlCiEz0kByWZc9vK5IWPS2Uke8pytHVMRLGsuRGx9jzHenqgz5h09SyLCORzy3vxDbDgcQNvSW7ZW9UlMx0P1Xxx1z7ykx0P2Xx1k0G2NSx0P1XxbUI9CH7IL7VI3MN995EghVWs8czX7b8G8NLZZVVNEYzmkvNqzuAdJe0YoJJqbtER5kpMx0P1XxXO1L0wne1jx2TV7JuHEfDtjZfqSjQcBQFSAWSo5jMowVYgNAx0P1Xx12dALmx0P1Xxz9FcXlz4mI6s8pQyKZfi1jixE68qlu1j2s629cxGHKRFoPOv6yx0P2XxMarnxPwgmagwBZDla0Hsv3Kxs2sbegisrodC1wGfYhjx0P2XxyP7bUvx0P2Xxuh8x0P2Xx6uLMDfZx0P2XxpKqtiahkqVOkJpBwZG9x0P1Xx1jAxx0P2Xx4GmpO4JcWqDlUYKVPZ1eoQN8Jlx0P2XxocCCshpx45BT6f67tNkOkRMfRx0P1XxJIPMaOzDdEqq3Hc1qluZBbg30jLJFnTljGDppxVvw1Ty2BDCSmsgezqg7GyDsnI6lex0P2XxGrEzNCNQ45m0s4AlgF5qfWNcBvxGtJh54Ynx0P2XxLtx0P2XxblYz45CDSl5euEML6kutOeAdlEtUhHgLdEqxT9hHl96lvzF4IThn6FPNg25whJIywoJFx0P2Xxhn6b9TeaMGoedXToIxM5x0P1Xxj99L8rdrEXtMAInfm3f7glXYTIokQu7QhLwkuZxc2KCaeeGsen2JOhUbn8Ax0P1XxeaL5u5b1pnsHAycDuSwzshQDkQzNTOaBycICb5PxLvKpcKWx0P1XxogSn2jQx0P1XxotjBHNSdIdt4GmHNeVuKx0P1XxuWcZQFCCeHGBgQySlSrIkBKWVJMsqSxZu6SXhwYqr4tHncx0P2Xx0u5kUgGrjx0P2Xx9n1wAIaZHlhp2a5FnHLz43PT0lGvihIBXaZvJx0P2XxDzHWx0P2Xx8HsozGOlSRXaItm2TqARmXWzCYYdx0P1XxuhBWA0bzx0P2XxyCcsSJ7t10EmBecvOCQx0P2XxvZJgKFazwYJlqFJTzSwJfvHGiVAxUt8x0P1XxEogyv3FDMpAWFCFjXJCxsiDljcrDMMqx0P1XxtL0IuWQlxcAQEQk0t0wjnxSeeABFQOn3eXEX8sJWfmqx0P1XxKS7BNeobUq0K8BeAC1VlpCrkCv1AoraLJ0DuJW0uj4BTIEsov9eeMI9iykOXwdSvQTheXPyNp21tdewUMhCHQd9gh07R3CCe0EPZ7OQQqKx0P1XxrKqW4xJsxUJ86fB6K9OVYCLReuNYwmqKxTmx0P1XxOy9zIqSsG5XQfMux0P2XxOUTt88Smx0P1XxGXx0P1XxKQfUjIg4eQyOGqcM790vm5vOVZ
+load('config.js');
+
+function _normalizeUrl(u) {
+    if (!u) return BASE_URL + "/";
+    u = ("" + u).trim();
+    if (u.indexOf("http") === 0) return u;
+    if (u.indexOf("//") === 0) return "https:" + u;
+    if (u.indexOf("/") === 0) return BASE_URL + u;
+    return BASE_URL + "/" + u;
+}
+
+function execute(url) {
+    try {
+        url = _normalizeUrl(url);
+        var doc = Http.get(url).html();
+        if (!doc) return Response.error("Không lấy được trang đọc: " + url);
+
+        var selectors = [
+            "div.reading-content img",
+            "div#content img",
+            ".entry-content img",
+            ".post-content img",
+            ".gallery img",
+            "img.wp-manga-chapter-img",
+            "img"
+        ];
+
+        var images = [];
+        for (var i = 0; i < selectors.length; i++) {
+            var els = doc.select(selectors[i]);
+            if (els && els.size() > 0) {
+                els.forEach(e => {
+                    var src = e.attr('data-src') || e.attr('data-original') || e.attr('src') || "";
+                    if (!src) return;
+                    src = src.trim();
+                    if (src.indexOf('//') === 0) src = 'https:' + src;
+                    if (src.indexOf('http') !== 0) {
+                        // relative url
+                        if (src.indexOf('/') === 0) src = BASE_URL + src;
+                        else src = BASE_URL + '/' + src;
+                    }
+                    if (images.indexOf(src) === -1) images.push(src);
+                });
+                if (images.length > 0) break;
+            }
+        }
+
+        // If no images found via selectors (site may render pages into JS), extract CDN image URLs from the raw HTML
+        try {
+            var raw = doc.toString();
+            var re = /https:\/\/cdn\.vinahentai\.life\/[\w\-./]+\.(?:webp|jpg|jpeg|png)/g;
+            var m;
+            while ((m = re.exec(raw)) !== null) {
+                var u = m[0];
+                if (images.indexOf(u) === -1) images.push(u);
+            }
+        } catch (e) {
+            // ignore
+        }
+
+        return Response.success(images);
+    } catch (err) {
+        return Response.error("chap.js error: " + err);
+    }
+}

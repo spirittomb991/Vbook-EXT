@@ -4,13 +4,13 @@
         "author": "VbooksT",
         "version": 1,
         "source": "https:\/\/vinahentai.life",
-        "regexp": "https?:\/\/(?:www\\.)?vinahentai\\.[a-z]+\/truyen-hentai\/[^?&\/]+\/?$",
+        "regexp": "^https?:\\/\\/(?:www\\.)?vinahentai\\.life\\/truyen-hentai\\/[^\\/\\s?#]+\\/?(?:\\?.*)?$",
         "description": "Đọc truyện trên trang vinahentai.life",
         "locale": "vi_VN",
         "type": "comic",
         "tag": "nsfw",
         "language": "javascript",
-        "encrypt": true
+        "encrypt": false
     },
     "script": {
         "detail": "detail.js",

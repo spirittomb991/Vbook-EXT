@@ -1,8 +1,8 @@
 load('config.js');
 function execute() {
-    const doc = fetch(`${BASE_URL}/the-loai-genres`).html();
-    const el = doc.select(".genres a");
-    const data = [];
+    var doc = fetch(BASE_URL + "/the-loai-genres").html();
+    var el = doc.select(".genres a");
+    var data = [];
     for (var i = 0; i < el.size(); i++) {
         var e = el.get(i);
         data.push({
