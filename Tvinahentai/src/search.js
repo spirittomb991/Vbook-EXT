@@ -16,7 +16,7 @@ function safeText(sel) {
 function execute(key, page) {
     try {
         var q = encodeURIComponent(key || "");
-        var searchUrl = BASE_URL + "/?s=" + q;
+        var searchUrl = BASE_URL + "/search?q=" + q;
         if (page && page > 1) searchUrl += "&paged=" + page;
 
         var doc = Http.get(searchUrl).html();

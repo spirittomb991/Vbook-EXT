@@ -11,7 +11,7 @@ function execute(url, page) {
   }
 
   var doc = getDoc(target);
-  if (!doc) return Response.error("Không tải được danh sách truyện");
+  if (!doc) return Response.error("Không tải được thể loại");
 
   var list = parseComicList(doc);
   var next = null;

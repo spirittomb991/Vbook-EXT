@@ -1,21 +1,23 @@
 load("utils.js");
 
 function execute() {
-  try {
-    var doc = getDoc("https://vinahentai.life/genres");
-    var out = [];
-    var links = doc.select('a[href*="/the-loai/"], a[href*="/genres/"]');
-    var exists = {};
-    for (var i = 0; i < links.size(); i++) {
-      var a = links.get(i);
-      var title = textOf(a).replace(/\s*Xem\s*.*/i, "").trim();
-      var href = absUrl(a.attr("href"));
-      if (!title || exists[href] || href === "https://vinahentai.life/genres") continue;
-      out.push({ title: title, input: href, script: "homecontent.js" });
-      exists[href] = true;
-    }
-    return Response.success(out);
-  } catch (e) {
-    return Response.error(String(e));
+  var doc = getDoc(BASE_URL + "/genres");
+  if (!doc) return Response.error("Không tải được danh sách thể loại");
+
+  var out = [];
+  var used = {};
+  var links = doc.select("a[href]");
+  for (var i = 0; i < links.size(); i++) {
+    var a = links.get(i);
+    var href = removeEndSlash(getAttr(a, "href"));
+    var title = trimText(getText(a));
+    if (title === "" || used[href]) continue;
+    if (isBadTitle(title)) continue;
+    if (href === BASE_URL + "/genres") continue;
+    if (href.indexOf(BASE_URL + "/genres/") !== 0 && href.indexOf(BASE_URL + "/the-loai/") !== 0 && href.indexOf(BASE_URL + "/tag/") !== 0) continue;
+
+    out.push({ title: title, input: href, script: "genrecontent.js" });
+    used[href] = true;
   }
+  return Response.success(out);
 }

@@ -1,44 +1,75 @@
 load("utils.js");
 
 function execute(url) {
-  try {
-    var doc = getDoc(url);
-    var name = textOf(doc.select("h1").first());
-    var coverEl = doc.select('img[alt*="Bìa"], img[alt*="bìa"], img').first();
-    var cover = absUrl(attrOf(coverEl, "src"));
-    var body = textOf(doc.body());
+  var pageUrl = removeEndSlash(url);
+  var doc = getDoc(pageUrl);
+  if (!doc) return Response.error("Không tải được trang chi tiết");
 
-    var author = "";
-    var authorLink = doc.select('a[href*="tac-gia"], a[href*="author"], a[href*="artist"]').first();
-    if (authorLink) author = textOf(authorLink);
-
-    var desc = "";
-    var intro = doc.select("h2:contains(Giới Thiệu), h2:contains(Giới thiệu)").first();
-    if (intro) {
-      var p = intro.nextElementSibling();
-      if (p) desc = textOf(p);
-    }
-    if (!desc) desc = body.substring(0, 300);
-
-    var genres = [];
-    var gs = doc.select('a[href*="/the-loai/"], a[href*="/genres/"]');
-    for (var i = 0; i < gs.size(); i++) {
-      var g = gs.get(i);
-      var title = textOf(g).replace(/\s*Xem\s*.*/i, "").trim();
-      if (title) genres.push({ title: title, input: absUrl(g.attr("href")), script: "homecontent.js" });
-    }
-
-    return Response.success({
-      name: name,
-      cover: cover,
-      host: BASE_URL,
-      author: author,
-      description: desc,
-      detail: body,
-      ongoing: body.indexOf("Chưa hoàn thành") >= 0,
-      genres: genres
-    });
-  } catch (e) {
-    return Response.error(String(e));
+  var name = "";
+  var h1 = getFirst(doc, "h1");
+  if (h1) name = getText(h1);
+  if (name === "") {
+    var titleTag = getFirst(doc, "title");
+    if (titleTag) name = getText(titleTag);
+    var bar = name.indexOf("|");
+    if (bar >= 0) name = name.substring(0, bar);
+    var dash = name.indexOf("-");
+    if (dash >= 0) name = name.substring(0, dash);
+    name = trimText(name);
   }
+  if (name === "" || isBadTitle(name)) name = makeNameFromUrl(pageUrl);
+
+  var cover = "";
+  var imgs = doc.select("img");
+  for (var i = 0; i < imgs.size(); i++) {
+    var img = imgs.get(i);
+    var src = absUrl(getAttr(img, "src"));
+    var alt = getAttr(img, "alt");
+    var low = (src + " " + alt).toLowerCase();
+    if (src === "") continue;
+    if (low.indexOf("logo") >= 0 || low.indexOf("avatar") >= 0 || low.indexOf("favicon") >= 0) continue;
+    cover = src;
+    break;
+  }
+
+  var author = "";
+  var authorLinks = doc.select('a[href*="tac-gia"], a[href*="author"], a[href*="artist"]');
+  if (authorLinks && authorLinks.size() > 0) author = getText(authorLinks.get(0));
+
+  var description = "";
+  var ps = doc.select("p");
+  for (var p = 0; p < ps.size(); p++) {
+    var pt = getText(ps.get(p));
+    if (pt.length > 40) {
+      description = pt;
+      break;
+    }
+  }
+
+  var detail = description;
+  if (detail === "") detail = name;
+
+  var genreList = [];
+  var usedGenre = {};
+  var gs = doc.select('a[href*="/genres/"], a[href*="/the-loai/"], a[href*="/tag/"]');
+  for (var g = 0; g < gs.size(); g++) {
+    var ga = gs.get(g);
+    var gt = getText(ga);
+    var gh = removeEndSlash(getAttr(ga, "href"));
+    if (gt === "" || usedGenre[gh]) continue;
+    if (isBadTitle(gt)) continue;
+    genreList.push({ title: gt, input: gh, script: "genrecontent.js" });
+    usedGenre[gh] = true;
+  }
+
+  return Response.success({
+    name: name,
+    cover: cover,
+    host: BASE_URL,
+    author: author,
+    description: description,
+    detail: detail,
+    ongoing: false,
+    genres: genreList
+  });
 }
