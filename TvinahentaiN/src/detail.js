@@ -1,7 +1,7 @@
 load("utils.js");
 
 function execute(url) {
-  var pageUrl = removeEndSlash(url);
+  var pageUrl = removeEndSlash(safeUrl(url));
   var doc = getDoc(pageUrl);
   if (!doc) return Response.error("Không tải được trang chi tiết");
 
@@ -28,7 +28,7 @@ function execute(url) {
     var low = (src + " " + alt).toLowerCase();
     if (src === "") continue;
     if (low.indexOf("logo") >= 0 || low.indexOf("avatar") >= 0 || low.indexOf("favicon") >= 0) continue;
-    cover = src;
+    cover = safeUrl(src);
     break;
   }
 
@@ -55,7 +55,7 @@ function execute(url) {
   for (var g = 0; g < gs.size(); g++) {
     var ga = gs.get(g);
     var gt = getText(ga);
-    var gh = removeEndSlash(getAttr(ga, "href"));
+    var gh = removeEndSlash(safeUrl(getAttr(ga, "href")));
     if (gt === "" || usedGenre[gh]) continue;
     if (isBadTitle(gt)) continue;
     genreList.push({ title: gt, input: gh, script: "genrecontent.js" });

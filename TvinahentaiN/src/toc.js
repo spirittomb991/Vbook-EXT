@@ -11,33 +11,14 @@ function firstTextIn(el, selector) {
   return "";
 }
 
-// Chỉ dùng để so sánh URL, không dùng để fetch.
-// Lý do: slug tiếng Việt có thể ở dạng raw hoặc %E1..., nếu encode lại rồi so với URL raw sẽ mất chap.
-function decodeForCompare(v) {
-  var s = removeEndSlash(absUrl(v));
-  s = s.replace(/&amp;/g, "&");
-  try { s = decodeURIComponent(s); } catch (e) {}
-  return s;
-}
-
 function cleanHrefForReturn(v) {
-  var s = absUrl(v);
-  s = s.replace(/\\\//g, "/");
-  s = s.replace(/&amp;/g, "&");
-  s = s.replace(/\\u0026/g, "&");
-  s = s.replace(/[\"'<>\s]/g, "");
-
-  // Vbook có thể tự encode chữ đ thành %C4%91.
-  // Ở toc chỉ trả URL để hiển thị/chuyển tiếp, nên decode lại phần slug tiếng Việt.
-  // Khi fetch ở chap.js/getDoc, safeUrl() sẽ encodeURI lại đúng chuẩn.
-  try { s = decodeURIComponent(s); } catch (e) {}
-
+  var s = encodeUrlForVbook(v);
   return removeEndSlash(s);
 }
 
 function directChildTail(storyUrl, href) {
-  var story = decodeForCompare(storyUrl);
-  var h = decodeForCompare(href);
+  var story = decodeUrlForCompare(storyUrl);
+  var h = decodeUrlForCompare(href);
   if (h === story) return "";
   if (h.indexOf(story + "/") !== 0) return "";
   var tail = h.substring(story.length + 1);
@@ -73,7 +54,7 @@ function pushChapter(out, used, storyUrl, a, index) {
   var tail = directChildTail(storyUrl, href);
   if (tail === "") return;
 
-  var key = decodeForCompare(href).toLowerCase();
+  var key = decodeUrlForCompare(href).toLowerCase();
   if (used[key]) return;
 
   // Không lọc theo chap-1 nữa. Trang có slug chương tự do như cunny-ma-fap-uogghhh, coming-soon, hoặc slug tiếng Việt có dấu.

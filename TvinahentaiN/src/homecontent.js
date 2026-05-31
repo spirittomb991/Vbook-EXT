@@ -5,7 +5,7 @@ function execute(url, page) {
   if (page !== null && page !== undefined && String(page) !== "") pageNo = parseInt(page, 10);
   if (!pageNo || pageNo < 1) pageNo = 1;
 
-  var target = absUrl(url);
+  var target = safeUrl(url);
   if (pageNo > 1) {
     target = target + (target.indexOf("?") >= 0 ? "&" : "?") + "page=" + pageNo;
   }

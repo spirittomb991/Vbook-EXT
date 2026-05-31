@@ -18,15 +18,71 @@ function absUrl(url) {
   return BASE_URL + "/" + u;
 }
 
-function safeUrl(url) {
+function cleanInputUrl(url) {
   var u = absUrl(url);
   if (u === "") return "";
   u = u.replace(/\\\//g, "/");
   u = u.replace(/&amp;/g, "&");
   u = u.replace(/\\u0026/g, "&");
-  u = u.replace(/[\\"'<>\s]/g, "");
-  try { u = encodeURI(u); } catch (e) {}
+  u = u.replace(/[\"'<>\s]/g, "");
   return u;
+}
+
+// URL trả về cho Vbook: luôn là dạng encoded an toàn.
+// Nếu đầu vào đã là %C4%91 thì không được biến thành %25C4%2591.
+function encodeUrlForVbook(url) {
+  var u = cleanInputUrl(url);
+  if (u === "") return "";
+  try { u = decodeURIComponent(u); } catch (e) {}
+  try { u = encodeURI(u); } catch (e2) {}
+  return u;
+}
+
+// URL dùng để fetch: nhận cả URL raw có dấu và URL đã encoded từ Vbook.
+function safeUrl(url) {
+  return encodeUrlForVbook(url);
+}
+
+// Chỉ dùng để so sánh slug/path, không dùng để trả về Vbook.
+function decodeUrlForCompare(url) {
+  var u = cleanInputUrl(url);
+  try { u = decodeURIComponent(u); } catch (e) {}
+  return removeEndSlashRaw(u);
+}
+
+function removeEndSlashRaw(url) {
+  var u = S(url);
+  while (u.length > BASE_URL.length && u.charAt(u.length - 1) === "/") {
+    u = u.substring(0, u.length - 1);
+  }
+  return u;
+}
+
+function fetchResponse(url) {
+  var variants = [];
+  var a = cleanInputUrl(url);
+  var b = safeUrl(url);
+  var c = a;
+  try { c = decodeURIComponent(a); } catch (e) {}
+
+  if (b !== "") variants.push(b);
+  if (a !== "" && a !== b) variants.push(a);
+  if (c !== "" && c !== a && c !== b) variants.push(c);
+
+  for (var i = 0; i < variants.length; i++) {
+    try {
+      var res = fetch(variants[i], {
+        method: "GET",
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Linux; Android 12; Mobile) AppleWebKit/537.36 Chrome/120 Safari/537.36",
+          "Referer": BASE_URL + "/",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        }
+      });
+      if (res && res.ok) return res;
+    } catch (e2) {}
+  }
+  return null;
 }
 
 function isValidHttpUrl(url) {
@@ -68,25 +124,13 @@ function getFirst(doc, selector) {
 }
 
 function getDoc(url) {
-  var finalUrl = safeUrl(url);
-  if (finalUrl === "") return null;
-  var res = null;
-  try {
-    res = fetch(finalUrl, {
-    method: "GET",
-    headers: {
-      "User-Agent": "Mozilla/5.0 (Linux; Android 12; Mobile) AppleWebKit/537.36 Chrome/120 Safari/537.36",
-      "Referer": BASE_URL + "/",
-      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-    }
-  });
-  } catch (e) { return null; }
-  if (!res || !res.ok) return null;
-  return res.html();
+  var res = fetchResponse(url);
+  if (!res) return null;
+  try { return res.html(); } catch (e) { return null; }
 }
 
 function slugOf(url) {
-  var u = removeEndSlash(url);
+  var u = decodeUrlForCompare(url);
   var p = u.replace(BASE_URL, "");
   var arr = p.split("/");
   if (arr.length >= 3) return arr[2];
@@ -166,9 +210,12 @@ function parseComicList(doc) {
   var links = doc.select('a[href*="/truyen-hentai/"]');
   for (var i = 0; i < links.size(); i++) {
     var a = links.get(i);
-    var href = removeEndSlash(getAttr(a, "href"));
-    if (!isStoryUrl(href)) continue;
-    if (used[href]) continue;
+    var hrefRaw = removeEndSlash(absUrl(getAttr(a, "href")));
+    if (!isStoryUrl(hrefRaw)) continue;
+    var href = removeEndSlash(encodeUrlForVbook(hrefRaw));
+    var key = href.toLowerCase();
+    try { key = decodeURIComponent(href).toLowerCase(); } catch (e) {}
+    if (used[key]) continue;
 
     var title = cleanTitle(getText(a));
     if (isBadTitle(title)) {
@@ -185,7 +232,7 @@ function parseComicList(doc) {
       cover: imageFromBox(a),
       description: ""
     });
-    used[href] = true;
+    used[key] = true;
   }
   return out;
 }
@@ -229,6 +276,41 @@ function cleanChapterName(title, href) {
   return t;
 }
 
+
+function decodeImageUrl(src) {
+  var s = S(src);
+  s = s.replace(/\\\//g, "/");
+  s = s.replace(/&amp;/g, "&");
+  s = s.replace(/\\u0026/g, "&");
+  s = s.replace(/\\u002F/g, "/");
+  s = s.replace(/\\\//g, "/");
+
+  // Next/Image thường trả dạng:
+  // /_next/image?url=https%3A%2F%2Fcdn.vinahentai.life%2Fmanga-images%2F...jpg&w=...
+  // Vbook đọc ổn hơn khi trả trực tiếp URL gốc trên CDN.
+  var pos = s.indexOf("url=");
+  if (pos >= 0) {
+    var q = s.substring(pos + 4);
+    var amp = q.indexOf("&");
+    if (amp >= 0) q = q.substring(0, amp);
+    try { q = decodeURIComponent(q); } catch (e) {}
+    q = q.replace(/\\\//g, "/");
+    if (q.indexOf("manga-images") >= 0 || q.indexOf("cdn.vinahentai.life") >= 0) {
+      return absUrl(q);
+    }
+  }
+
+  // Nếu toàn bộ URL bị encode trong JSON/script thì decode thử để lộ manga-images.
+  if (s.indexOf("%2F") >= 0 || s.indexOf("%3A") >= 0) {
+    var d = s;
+    try { d = decodeURIComponent(s); } catch (e2) {}
+    d = d.replace(/\\\//g, "/");
+    if (d.indexOf("manga-images") >= 0 || d.indexOf("cdn.vinahentai.life") >= 0) return absUrl(d);
+  }
+
+  return absUrl(s);
+}
+
 function getImageSrc(img) {
   var src = getAttr(img, "src");
   if (src === "") src = getAttr(img, "data-src");
@@ -244,7 +326,7 @@ function getImageSrc(img) {
       if (parts.length > 0) src = trimText(parts[parts.length - 1].split(" ")[0]);
     }
   }
-  return absUrl(src);
+  return decodeImageUrl(src);
 }
 
 function isComicImage(src, img, chapUrl) {
@@ -257,8 +339,10 @@ function isComicImage(src, img, chapUrl) {
   if (low.indexOf("ads") >= 0 || low.indexOf("advert") >= 0) return false;
 
   // Ảnh chương của site nằm trên cdn.vinahentai.life/manga-images/...
-  if (src.indexOf("cdn.vinahentai.life/manga-images/") >= 0) return true;
-  if (src.indexOf("/manga-images/") >= 0) return true;
+  var decodedSrc = S(src);
+  try { decodedSrc = decodeURIComponent(decodedSrc); } catch (e) {}
+  if (decodedSrc.indexOf("cdn.vinahentai.life/manga-images/") >= 0) return true;
+  if (decodedSrc.indexOf("/manga-images/") >= 0) return true;
 
   // Fallback: giữ ảnh có alt dạng Chapter nếu site đổi domain CDN.
   if (low.indexOf("chapter") >= 0 || low.indexOf("chap") >= 0) return true;
@@ -300,23 +384,9 @@ function imagesToList(doc, chapUrl) {
 }
 
 function getTextResponse(url) {
-  var finalUrl = safeUrl(url);
-  if (finalUrl === "") return "";
-  var res = null;
-  try {
-    res = fetch(finalUrl, {
-      method: "GET",
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Linux; Android 12; Mobile) AppleWebKit/537.36 Chrome/120 Safari/537.36",
-        "Referer": BASE_URL + "/",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-      }
-    });
-  } catch (e) {
-    return "";
-  }
-  if (!res || !res.ok) return "";
-  return res.text();
+  var res = fetchResponse(url);
+  if (!res) return "";
+  try { return res.text(); } catch (e) { return ""; }
 }
 
 function normalizeHtmlUrl(u) {
@@ -344,6 +414,26 @@ function imagesFromRawHtml(html) {
     if (used[src]) continue;
     out.push(src);
     used[src] = true;
+  }
+
+  // Bắt URL CDN bị encode trong Next/Image hoặc JSON: https%3A%2F%2Fcdn...%2Fmanga-images...
+  var reEnc = /https?%3A%2F%2F[^"'<>\s]+?(?:manga-images|manga-images%2F)[^"'<>\s]+?\.(?:jpg|jpeg|png|webp)(?:%3F[^"'<>\s]*)?/ig;
+  while ((m = reEnc.exec(text)) !== null) {
+    var srcEnc = normalizeHtmlUrl(m[0]);
+    if (!isImageUrl(srcEnc)) continue;
+    if (used[srcEnc]) continue;
+    out.push(srcEnc);
+    used[srcEnc] = true;
+  }
+
+  // Bắt tham số url= trong Next/Image.
+  var reNext = /url=([^"'&<>\s]+manga-images[^"'&<>\s]+?\.(?:jpg|jpeg|png|webp)(?:%3F[^"'&<>\s]*)?)/ig;
+  while ((m = reNext.exec(text)) !== null) {
+    var srcNext = normalizeHtmlUrl(m[1]);
+    if (!isImageUrl(srcNext)) continue;
+    if (used[srcNext]) continue;
+    out.push(srcNext);
+    used[srcNext] = true;
   }
 
   // Fallback: bắt trong các attribute lazy phổ biến.
@@ -377,6 +467,7 @@ function mergeImageLists(a, b) {
 }
 
 function makeImageItem(src) {
-  var s = safeUrl(src);
-  return { link: s, fallback: [s] };
+  var s = safeUrl(decodeImageUrl(src));
+  // Một số bản Vbook đọc link, một số bản đọc url/src; giữ đủ 3 field để tương thích.
+  return { link: s, url: s, src: s, fallback: [s] };
 }
