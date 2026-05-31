@@ -1,13 +1,13 @@
 load('config.js');
 function execute(url, page) {
-    if (!page) page = '1';
-    let response = fetch(url + "?page=" + page);
+    let pageNumber = parseInt(page) || 1;
+    let response = fetch(url + "?page=" + pageNumber);
 
     if (response.ok) {
         let doc = response.html();
         // HTML mới: danh sách truyện nằm trong .items > .item
         let el = doc.select(".items .item");
-        let next = doc.select(".pagination .page-item.active + .page-item a").attr("href") ? page + 1 : null;
+        let next = doc.select(".pagination .page-item.active + .page-item a").attr("href") ? pageNumber + 1 : null;
 
         const data = [];
         for (let i = 0; i < el.size(); i++) {
