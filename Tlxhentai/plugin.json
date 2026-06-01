@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "name": "T-lxhentai",
+    "author": "VbookT",
+    "version": 1,
+    "source": "https://lxmanga.org/",
+    "regexp": "https?:\\/\\/(www\\.)?lxmanga\\.org\\/.*",
+    "description": "Truyện T-lxhentai",
+    "locale": "vi_VN",
+    "tag": "",
+    "type": "comic"
+  },
+  "script": {
+    "home": "home.js",
+    "genre": "genre.js",
+    "detail": "detail.js",
+    "search": "search.js",
+    "toc": "toc.js",
+    "chap": "chap.js"
+  }
+}

@@ -1,11 +1,9 @@
 load("utils.js");
 
-function execute(key, page) {
+function execute(url) {
     try {
-        key = trimText(key);
-        var url = BASE_URL + "/?s=" + encodeURIComponent(key);
-        if (page && ("" + page).indexOf("http") === 0) url = page;
-        Console.log("search url: " + url);
+        url = toAbsoluteUrl(url || BASE_URL + "/moi-cap-nhat");
+        Console.log("home input: " + url);
         var doc = getDoc(url);
         if (!doc) return Response.success([], null);
         var list = parseComicList(doc);
@@ -13,7 +11,7 @@ function execute(key, page) {
         Console.log("list count: " + list.length);
         return Response.success(list, next);
     } catch (e) {
-        Console.log("search error: " + e);
+        Console.log("homecontent error: " + e);
         return Response.success([], null);
     }
 }
