@@ -1,43 +1,32 @@
-load("utils.js");
-
+load('config.js');
 function execute() {
-    try {
-        var doc = getDoc(BASE_URL + "/the-loai");
-        if (!doc) return Response.success([]);
-        var out = [];
-        var used = {};
-        var links = doc.select(".channel-item a[href], a[href*=/genre/], a[href*=/category/]");
+    var doc = getDoc(BASE_URL + "/the-loai");
+    var data = [];
+    var used = {};
+    if (doc) {
+        var links = doc.select("a[href*='/genre/'], a[href*='/category/']");
         for (var i = 0; i < links.size(); i++) {
             var a = links.get(i);
-            var href = toAbsoluteUrl(getAttr(a, "href"));
+            var href = absUrl(a.attr("href"));
             if (used[href]) continue;
-            if (href.indexOf(BASE_URL + "/genre/") !== 0 && href.indexOf(BASE_URL + "/category/") !== 0) continue;
-            var title = getAttr(a, "title");
+            if (href.indexOf("/genre/") < 0 && href.indexOf("/category/") < 0) continue;
+            var title = cleanText(a.attr("title"));
             if (title.indexOf("Tất Cả Truyện ") === 0) title = title.replace("Tất Cả Truyện ", "");
-            if (title === "") {
-                var titleEl = a.select(".text-txt-primary, .channel-item__name_details a, .fw-semibold");
-                if (titleEl.size() > 0) title = getText(titleEl.get(0));
-            }
-            if (title === "") title = getText(a);
-            title = cleanText(title).replace(/^Tất Cả Truyện\s+/i, "");
-            if (isBadTitle(title)) continue;
-            var description = "";
-            var p = a.select("p");
-            if (p.size() > 0) description = getText(p.get(0));
-            var displayTitle = title;
-            if (description !== "") displayTitle = title + "\n- " + description;
+            if (title === "") title = cleanText(a.text());
+            title = title.replace(/^Tất Cả Truyện\s+/i, "");
+            if (title === "" || title === "Đọc ngay") continue;
             used[href] = true;
-            out.push({ title: displayTitle, input: href, script: "genrecontent.js" });
+            data.push({title: title, input: href, script: "gen.js"});
         }
-        if (out.length === 0) {
-            out.push({ title: "Không Che", input: BASE_URL + "/category/khong-che", script: "genrecontent.js" });
-            out.push({ title: "One Shot", input: BASE_URL + "/category/one-shot", script: "genrecontent.js" });
-            out.push({ title: "Có Che", input: BASE_URL + "/category/co-che", script: "genrecontent.js" });
-        }
-        Console.log("genre count: " + out.length);
-        return Response.success(out);
-    } catch (e) {
-        Console.log("genre error: " + e);
-        return Response.success([]);
     }
+    if (data.length === 0) {
+        data = [
+            {title: "Không Che", input: BASE_URL + "/category/khong-che", script: "gen.js"},
+            {title: "Có Che", input: BASE_URL + "/category/co-che", script: "gen.js"},
+            {title: "One Shot", input: BASE_URL + "/category/one-shot", script: "gen.js"},
+            {title: "Milf", input: BASE_URL + "/genre/milf", script: "gen.js"},
+            {title: "NTR", input: BASE_URL + "/genre/ntr", script: "gen.js"}
+        ];
+    }
+    return Response.success(data);
 }
