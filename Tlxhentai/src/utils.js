@@ -10,18 +10,6 @@ function cleanText(text) {
     return trimText((text || "").replace(/&nbsp;/g, " ").replace(/\u00a0/g, " "));
 }
 
-function htmlDecode(text) {
-    if (!text) return "";
-    text = "" + text;
-    return text.replace(/&amp;/g, "&")
-        .replace(/&#038;/g, "&")
-        .replace(/&quot;/g, '"')
-        .replace(/&#039;/g, "'")
-        .replace(/&#8217;/g, "'")
-        .replace(/&#8211;/g, "-")
-        .replace(/\\\//g, "/");
-}
-
 function safeDecodeUrl(url) {
     if (!url) return "";
     try { return decodeURI(url); } catch (e) { return url; }
@@ -30,7 +18,7 @@ function safeDecodeUrl(url) {
 function safeEncodeUrl(url) {
     if (!url) return "";
     try {
-        var decoded = safeDecodeUrl(htmlDecode(url));
+        var decoded = safeDecodeUrl(url);
         return encodeURI(decoded).replace(/%25([0-9A-Fa-f]{2})/g, "%$1");
     } catch (e) {
         return url;
@@ -39,21 +27,21 @@ function safeEncodeUrl(url) {
 
 function toAbsoluteUrl(url) {
     if (!url) return "";
-    url = trimText(htmlDecode(url));
-    if (url.indexOf("//") === 0) return safeEncodeUrl("https:" + url);
+    url = trimText(url);
+    if (url.indexOf("//") === 0) return "https:" + url;
     if (url.indexOf("http://") === 0 || url.indexOf("https://") === 0) return safeEncodeUrl(url);
     if (url.indexOf("/") === 0) return safeEncodeUrl(BASE_URL + url);
     return safeEncodeUrl(BASE_URL + "/" + url);
+}
+
+function normalizeCompareUrl(url) {
+    return removeEndSlash(safeDecodeUrl(toAbsoluteUrl(url))).toLowerCase();
 }
 
 function removeEndSlash(url) {
     if (!url) return "";
     while (url.length > 1 && url.lastIndexOf("/") === url.length - 1) url = url.substring(0, url.length - 1);
     return url;
-}
-
-function normalizeCompareUrl(url) {
-    return removeEndSlash(safeDecodeUrl(toAbsoluteUrl(url))).toLowerCase();
 }
 
 function getDoc(url) {
@@ -69,7 +57,7 @@ function getDoc(url) {
         if (!res || !res.ok) return null;
         return res.html();
     } catch (e) {
-        try { Console.log("getDoc error: " + e); } catch (e2) {}
+        try { Console.log("getDoc error: " + e); } catch (ex) {}
         return null;
     }
 }
@@ -93,20 +81,18 @@ function getText(el) {
 function isBadTitle(title) {
     title = cleanText(title).toLowerCase();
     if (title === "") return true;
-    var bad = ["đăng nhập", "đăng ký", "đăng truyện", "manage", "trang dịch giả", "tài khoản", "login", "register", "account", "dashboard", "profile", "report", "báo lỗi", "yêu thích", "thêm vào", "xem", "tất cả truyện"];
+    var bad = ["đăng nhập", "đăng ký", "đăng truyện", "manage", "trang dịch giả", "tài khoản", "login", "register", "account", "dashboard", "profile", "report", "báo lỗi", "yêu thích", "thêm vào", "xem"];
     for (var i = 0; i < bad.length; i++) if (title === bad[i]) return true;
     return false;
 }
 
 function isBadLink(url, text) {
-    var u = normalizeCompareUrl(url);
-    var t = cleanText(text).toLowerCase();
-    if (!u) return true;
-    if (u.indexOf("javascript:") === 0 || u.indexOf("#") >= 0) return true;
-    if (u.indexOf(BASE_URL) !== 0) return true;
-    var bad = ["/login", "/register", "/account", "/tai-khoan", "/dang-nhap", "/dang-ky", "/manage", "/dashboard", "/profile", "/user", "/admin", "/upload", "/dang-truyen", "/report", "/translator"];
-    for (var i = 0; i < bad.length; i++) if (u.indexOf(bad[i]) >= 0) return true;
-    if (isBadTitle(t)) return true;
+    url = normalizeCompareUrl(url);
+    text = cleanText(text).toLowerCase();
+    if (!url || url.indexOf(BASE_URL) !== 0) return true;
+    var bad = ["/login", "/register", "/account", "/tai-khoan", "/dang-nhap", "/dang-ky", "/manage", "/dashboard", "/profile", "/user", "/admin", "/upload", "/dang-truyen", "/report", "/translator", "/tag/", "/artist/", "/country/", "/doujinshi/", "#", "javascript:"];
+    for (var i = 0; i < bad.length; i++) if (url.indexOf(bad[i]) >= 0) return true;
+    if (isBadTitle(text)) return true;
     return false;
 }
 
@@ -121,16 +107,88 @@ function uniquePush(list, item, key) {
     } catch (e) { list.push(item); }
 }
 
+function extractUrlFromStyle(style) {
+    try {
+        if (!style) return "";
+        var m = /url\(['"]?([^'")]+)['"]?\)/i.exec(style);
+        if (m && m.length > 1) return m[1];
+    } catch (e) {}
+    return "";
+}
+
 function firstSrcFromSrcset(srcset) {
     try {
         if (!srcset) return "";
         var parts = srcset.split(",");
         for (var i = 0; i < parts.length; i++) {
             var one = trimText(parts[i]).split(" ")[0];
-            if (one !== "") return one;
+            if (one) return one;
         }
     } catch (e) {}
     return "";
+}
+
+function pickImageAttr(img) {
+    try {
+        if (!img) return "";
+        // LXMANGA dùng src=noimage.jpg và ảnh thật nằm ở data-src.
+        // Vì vậy tuyệt đối ưu tiên data-src trước src.
+        var attrs = ["data-src", "data-original", "data-lazy-src", "data-url", "data-full", "data-image", "data-bg", "data-cfsrc", "srcset", "src"];
+        for (var i = 0; i < attrs.length; i++) {
+            var val = "";
+            if (attrs[i] === "srcset") val = firstSrcFromSrcset(getAttr(img, attrs[i]));
+            else val = getAttr(img, attrs[i]);
+            val = cleanImageUrlForAny(val);
+            if (isGoodImage(val)) return val;
+        }
+    } catch (e) {}
+    return "";
+}
+
+function getImageFromElement(root) {
+    try {
+        if (!root) return "";
+
+        // 1) Đúng HTML list LXMANGA: a.comic-tmb > .image-container > img.card-img-top
+        // src có thể là noimage.jpg, data-src mới là cover thật.
+        var coverImgs = root.select("a.comic-tmb img.card-img-top");
+        for (var c = 0; c < coverImgs.size(); c++) {
+            var cover = pickImageAttr(coverImgs.get(c));
+            if (cover !== "") return cover;
+        }
+
+        // 2) Fallback cho search/home/genre carousel.
+        var priorityImgs = root.select(".image-container img.card-img-top, img.card-img-top, a.comic-tmb img, .image-container img, img.img-thumbnail");
+        for (var p = 0; p < priorityImgs.size(); p++) {
+            var src = pickImageAttr(priorityImgs.get(p));
+            if (src !== "") return src;
+        }
+
+        // 3) Fallback toàn bộ ảnh nhưng vẫn lọc noimage/imgmask/svg.
+        var imgs = root.select("img");
+        for (var i = 0; i < imgs.size(); i++) {
+            var src2 = pickImageAttr(imgs.get(i));
+            if (src2 !== "") return src2;
+        }
+
+        // 4) Background chỉ dùng cuối cùng.
+        var styled = root.select("[style]");
+        for (var s = 0; s < styled.size(); s++) {
+            var bg = cleanImageUrlForAny(extractUrlFromStyle(getAttr(styled.get(s), "style")));
+            if (isGoodImage(bg)) return bg;
+        }
+    } catch (e) {}
+    return "";
+}
+
+function isGoodImage(url) {
+    if (!url) return false;
+    var u = ("" + url).toLowerCase();
+    if (u.indexOf("data:image") === 0) return false;
+    if (u.indexOf(".svg") >= 0) return false;
+    var bad = ["noimage", "no-image", "default", "logo", "avatar", "icon", "banner", "ads", "advert", "placeholder", "favicon", "space3-4", "loading"];
+    for (var i = 0; i < bad.length; i++) if (u.indexOf(bad[i]) >= 0) return false;
+    return (u.indexOf(".jpg") >= 0 || u.indexOf(".jpeg") >= 0 || u.indexOf(".png") >= 0 || u.indexOf(".webp") >= 0 || u.indexOf(".avif") >= 0);
 }
 
 function decodeNextImage(url) {
@@ -145,163 +203,92 @@ function decodeNextImage(url) {
     return safeEncodeUrl(url);
 }
 
-function cleanImageUrl(src) {
+function proxyCoverUrl(url) {
+    try {
+        // Trả ảnh gốc của website. Không đổi sang proxy vì Vbook có thể không load được proxy
+        // và website dùng cover thật dạng .avif trong wp-content/uploads.
+        url = cleanImageUrlForAny(url);
+        if (!url) return "";
+        return url;
+    } catch (e) { return url; }
+}
+
+function cleanImageUrlForAny(src) {
     try {
         if (!src) return "";
-        src = trimText(htmlDecode(src));
+        src = trimText(src);
+        src = src.replace(/\\\//g, "/").replace(/&amp;/g, "&");
         if (src.indexOf("//") === 0) src = "https:" + src;
         if (src.indexOf("http://") !== 0 && src.indexOf("https://") !== 0) src = toAbsoluteUrl(src);
-        return decodeNextImage(src);
+        src = decodeNextImage(src);
+        return src;
     } catch (e) { return src; }
 }
 
-function isGoodImage(url) {
-    if (!url) return false;
-    var u = ("" + url).toLowerCase();
-    if (u.indexOf("data:image") === 0) return false;
-    if (u.indexOf(".svg") >= 0) return false;
-    var bad = ["noimage", "no-image", "space3-4", "imgmask", "placeholder", "loading", "logo", "avatar", "icon", "banner", "ads", "advert", "favicon"];
-    for (var i = 0; i < bad.length; i++) if (u.indexOf(bad[i]) >= 0) return false;
-    return u.indexOf(".jpg") >= 0 || u.indexOf(".jpeg") >= 0 || u.indexOf(".png") >= 0 || u.indexOf(".webp") >= 0 || u.indexOf(".avif") >= 0;
-}
-
-function pickImageAttr(img) {
-    try {
-        if (!img) return "";
-        // LXMANGA list: src=noimage.jpg, ảnh thật ở data-src. Vì vậy data-src phải đứng trước src.
-        var attrs = ["data-src", "data-original", "data-lazy-src", "data-url", "data-full", "data-image", "data-cfsrc", "srcset", "src"];
-        for (var i = 0; i < attrs.length; i++) {
-            var v = "";
-            if (attrs[i] === "srcset") v = firstSrcFromSrcset(getAttr(img, attrs[i]));
-            else v = getAttr(img, attrs[i]);
-            v = cleanImageUrl(v);
-            if (isGoodImage(v)) return v;
-        }
-    } catch (e) {}
-    return "";
-}
-
-function extractUrlFromStyle(style) {
-    try {
-        var m = /url\(['"]?([^'")]+)['"]?\)/i.exec(style || "");
-        if (m && m.length > 1) return cleanImageUrl(m[1]);
-    } catch (e) {}
-    return "";
-}
-
-function getCoverFromRoot(root) {
-    try {
-        if (!root) return "";
-        var sels = [
-            "a.comic-tmb img.card-img-top",
-            ".image-container img.card-img-top",
-            "img.card-img-top",
-            "img.img-thumbnail",
-            ".image-container img",
-            "a.comic-tmb img"
-        ];
-        for (var s = 0; s < sels.length; s++) {
-            var imgs = root.select(sels[s]);
-            for (var i = 0; i < imgs.size(); i++) {
-                var src = pickImageAttr(imgs.get(i));
-                if (src !== "") return src;
-            }
-        }
-        var styled = root.select("[style]");
-        for (var j = 0; j < styled.size(); j++) {
-            var bg = extractUrlFromStyle(getAttr(styled.get(j), "style"));
-            if (isGoodImage(bg)) return bg;
-        }
-    } catch (e) {}
-    return "";
-}
-
-function getHtml(doc) {
-    try { if (doc && doc.html) return "" + doc.html(); } catch (e) {}
-    try { return "" + doc; } catch (e2) {}
-    return "";
-}
-
-function buildDescription(card) {
-    var parts = [];
-    try {
-        var chap = getText(card.select(".label-code").size() > 0 ? card.select(".label-code").get(0) : null);
-        if (chap !== "") parts.push(chap);
-        var views = getText(card.select(".comic-views").size() > 0 ? card.select(".comic-views").get(0) : null);
-        if (views !== "") parts.push(views);
-        var time = getText(card.select(".comic-addtime").size() > 0 ? card.select(".comic-addtime").get(0) : null);
-        if (time !== "") parts.push(time);
-        var channel = getText(card.select(".channel-name").size() > 0 ? card.select(".channel-name").get(0) : null);
-        if (channel !== "") parts.push(channel);
-    } catch (e) {}
-    return parts.join(" - ");
-}
-
 function parseComicList(doc) {
-    var out = [];
+    var list = [];
     var used = {};
     try {
-        // Đúng HTML list/search: mỗi truyện là .col.pb-3 chứa a.comic-tmb và a.comic-link.
-        var cards = doc.select(".col.pb-3, li.splide__slide, .card.border-0.shadow-sm");
+        var cards = doc.select(".col.pb-3, .col, li.splide__slide, .card");
         for (var i = 0; i < cards.size(); i++) {
             var card = cards.get(i);
             var a = null;
-            var links = card.select("a.comic-link[href]");
+            var links = card.select("a.comic-link[href], a.comic-tmb[href]");
             if (links.size() > 0) a = links.get(0);
             if (!a) {
-                links = card.select("a.comic-tmb[href]");
+                links = card.select("a[href$=.html]");
                 if (links.size() > 0) a = links.get(0);
             }
             if (!a) continue;
-
             var href = toAbsoluteUrl(getAttr(a, "href"));
             var title = getAttr(a, "title");
             if (title === "") title = getText(a);
-            if (title === "") title = getText(card.select("a.comic-link").size() > 0 ? card.select("a.comic-link").get(0) : null);
             if (isBadLink(href, title)) continue;
-            if (href.indexOf(".html") < 0) continue;
+            if (href.indexOf(".html") < 0 || href.indexOf("/chap-") >= 0) continue;
             if (used[href]) continue;
-
-            var cover = getCoverFromRoot(card);
-            var desc = buildDescription(card);
             used[href] = true;
-            out.push({
-                name: cleanText(title),
-                link: href,
-                host: HOST,
-                cover: cover,
-                description: desc
-            });
+            var cover = proxyCoverUrl(getImageFromElement(card));
+            var desc = "";
+            var chapEl = card.select(".label-code");
+            var timeEl = card.select(".comic-addtime");
+            var viewEl = card.select(".comic-views");
+            if (chapEl.size() > 0) desc += cleanText(chapEl.get(0).text());
+            if (timeEl.size() > 0) desc += (desc ? " - " : "") + cleanText(timeEl.get(0).text());
+            if (viewEl.size() > 0) desc += (desc ? " - " : "") + cleanText(viewEl.get(0).text());
+            uniquePush(list, { name: title, link: href, host: HOST, cover: cover, description: desc }, href);
         }
-    } catch (e) { try { Console.log("parseComicList error: " + e); } catch (e2) {} }
-    return out;
-}
-
-function findNextPage(doc) {
-    try {
-        var active = doc.select("ul.pagination li.active a.page-link");
-        if (active.size() > 0) {
-            var page = parseInt(getAttr(active.get(0), "data-page"), 10);
-            if (!isNaN(page)) {
-                var links = doc.select("ul.pagination a.page-link[href]");
-                for (var i = 0; i < links.size(); i++) {
-                    var dp = parseInt(getAttr(links.get(i), "data-page"), 10);
-                    if (!isNaN(dp) && dp === page + 1) return toAbsoluteUrl(getAttr(links.get(i), "href"));
-                }
+        if (list.length === 0) {
+            var links2 = doc.select("a[href$=.html]");
+            for (var j = 0; j < links2.size(); j++) {
+                var a2 = links2.get(j);
+                var href2 = toAbsoluteUrl(getAttr(a2, "href"));
+                var title2 = getAttr(a2, "title");
+                if (title2 === "") title2 = getText(a2);
+                if (isBadLink(href2, title2) || href2.indexOf("/chap-") >= 0 || used[href2]) continue;
+                used[href2] = true;
+                uniquePush(list, { name: title2, link: href2, host: HOST, cover: "", description: "" }, href2);
             }
         }
-        var all = doc.select("ul.pagination a.page-link[href]");
-        for (var j = 0; j < all.size(); j++) {
-            var t = cleanText(getText(all.get(j)));
-            if (t === "2" || getAttr(all.get(j), "data-page") === "2") return toAbsoluteUrl(getAttr(all.get(j), "href"));
-        }
-    } catch (e) {}
-    return null;
+    } catch (e) { try { Console.log("parseComicList error: " + e); } catch (ex) {} }
+    return list;
 }
 
-function makeImageItem(url) {
-    return {
-        link: url,
-        fallback: url
-    };
+function findNextPage(doc, currentUrl) {
+    try {
+        var active = doc.select("ul.pagination li.active a[data-page]");
+        var cur = 0;
+        if (active.size() > 0) cur = parseInt(getAttr(active.get(0), "data-page"));
+        var links = doc.select("ul.pagination a.page-link[href]");
+        var best = "";
+        var bestPage = 999999;
+        for (var i = 0; i < links.size(); i++) {
+            var a = links.get(i);
+            var p = parseInt(getAttr(a, "data-page"));
+            var href = toAbsoluteUrl(getAttr(a, "href"));
+            if (!p || !href) continue;
+            if (cur > 0 && p === cur + 1) return href;
+            if (cur === 0 && p > 1 && p < bestPage) { bestPage = p; best = href; }
+        }
+        return best;
+    } catch (e) { return ""; }
 }

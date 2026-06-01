@@ -1,41 +1,62 @@
 load("utils.js");
 
-function storyBaseFromUrl(url) {
+function getStoryBase(url) {
     try {
-        url = removeEndSlash(toAbsoluteUrl(url));
-        if (url.indexOf(".html") >= 0) url = url.substring(0, url.lastIndexOf(".html"));
+        url = toAbsoluteUrl(url);
+        url = url.split("?")[0].split("#")[0];
+        if (url.lastIndexOf(".html") === url.length - 5) url = url.substring(0, url.length - 5);
+        var parts = url.split("/");
+        if (parts.length > 4) {
+            var last = parts[parts.length - 1];
+            // Nếu đang ở chap page thì bỏ slug chương để về URL truyện.
+            if (last !== "" && parts[parts.length - 2] !== "") {
+                return parts.slice(0, parts.length - 1).join("/");
+            }
+        }
         return url;
-    } catch (e) { return removeEndSlash(url); }
+    } catch (e) { return url; }
 }
 
-function chapterNumber(name, url) {
+function chapterNameFromHref(href) {
     try {
-        var s = (name || "") + " " + (url || "");
-        var m = /chap(?:ter)?[-\s_]*(\d+)/i.exec(s);
-        if (m && m.length > 1) return parseInt(m[1], 10);
-        m = /chuong[-\s_]*(\d+)/i.exec(s);
-        if (m && m.length > 1) return parseInt(m[1], 10);
-    } catch (e) {}
-    return -1;
+        var s = safeDecodeUrl(href).split("?")[0].split("#")[0];
+        var arr = s.split("/");
+        var slug = arr[arr.length - 1].replace(/\.html$/i, "");
+        if (slug === "coming-soon") return "Coming Soon";
+        if (slug === "one-shot" || slug === "oneshot") return "One Shot";
+        return cleanText(slug.replace(/-/g, " ").replace(/\bchap\b/i, "Chap"));
+    } catch (e) { return "Chapter"; }
 }
 
-function addChapter(out, used, href, name, base) {
+function addChapter(list, used, href, name, storyBase) {
     try {
         href = toAbsoluteUrl(href);
-        name = cleanText(name);
-        if (href === "" || used[href]) return;
-        if (href.indexOf(base) !== 0 && href.indexOf(BASE_URL) !== 0) return;
-        if (isBadLink(href, name || "chapter")) return;
-        if (href.indexOf(".html") < 0) return;
-        if (name === "") {
-            var slug = href.substring(href.lastIndexOf("/") + 1).replace(".html", "");
-            if (slug === "one-shot") name = "One Shot";
-            else name = slug.replace(/-/g, " ");
-        }
-        // Không lọc theo chữ chap để giữ one-shot.html, coming-soon, chap slug lạ.
-        used[href] = true;
-        out.push({ name: name, url: href, host: HOST });
+        var cmp = normalizeCompareUrl(href);
+        var baseCmp = normalizeCompareUrl(storyBase);
+        if (used[cmp]) return;
+        if (cmp.indexOf(baseCmp + "/") !== 0) return;
+        if (href.indexOf(".html") < 0 && href.indexOf("coming-soon") < 0) return;
+        var low = cmp.toLowerCase();
+        var bad = ["/login", "/register", "/tag/", "/genre/", "/category/", "/artist/", "/country/", "/doujinshi/", "/profile", "/account", "/report"];
+        for (var b = 0; b < bad.length; b++) if (low.indexOf(bad[b]) >= 0) return;
+        name = cleanText(name || "");
+        if (name === "" || name === "ĐỌC NGAY" || name === "Tiếp tục đọc") name = chapterNameFromHref(href);
+        // Chỉ cắt phần tên truyện nếu dạng "Tên truyện - Chap 1".
+        if (name.indexOf(" - ") >= 0) name = cleanText(name.substring(name.lastIndexOf(" - ") + 3));
+        used[cmp] = true;
+        list.push({ name: name, url: href, host: HOST });
     } catch (e) {}
+}
+
+function findChapterCount(doc) {
+    try {
+        var text = cleanText(doc.text());
+        var m = /D\.S\s*Chương\s*\((\d+)\)/i.exec(text);
+        if (m) return parseInt(m[1], 10);
+        m = /(\d+)\s*Chương/i.exec(text);
+        if (m) return parseInt(m[1], 10);
+    } catch (e) {}
+    return 0;
 }
 
 function execute(url) {
@@ -45,37 +66,48 @@ function execute(url) {
         var doc = getDoc(url);
         if (!doc) return Response.success([]);
 
-        var out = [];
+        var storyBase = getStoryBase(url);
+        var chapters = [];
         var used = {};
-        var base = storyBaseFromUrl(url);
 
-        // Đúng HTML detail LXMANGA: danh sách chương nằm trong #result-for-action ul.chapter-list.
-        var links = doc.select("#result-for-action ul.chapter-list a[href], ul.chapter-list a[href]");
-        for (var i = 0; i < links.size(); i++) {
-            addChapter(out, used, getAttr(links.get(i), "href"), getText(links.get(i)), base);
+        // 1) Chỉ ưu tiên đúng vùng danh sách chương, không quét toàn trang để tránh lấy truyện liên quan.
+        var listLinks = doc.select("#result-for-action ul.chapter-list a[href], ul.chapter-list a[href], .chapter-list a[href]");
+        for (var i = 0; i < listLinks.size(); i++) {
+            var a = listLinks.get(i);
+            addChapter(chapters, used, getAttr(a, "href"), getText(a) || getAttr(a, "title"), storyBase);
         }
 
-        // Fallback hẹp: chỉ lấy các link con trực tiếp của truyện trong khu vực action/current-reading, không quét truyện liên quan.
-        if (out.length === 0) {
-            var a2 = doc.select("#result-for-action a[href], .current-reading a[href], a.btn-danger[href]");
-            for (var j = 0; j < a2.size(); j++) {
-                var href = toAbsoluteUrl(getAttr(a2.get(j), "href"));
-                if (href.indexOf(base + "/") !== 0) continue;
-                addChapter(out, used, href, getText(a2.get(j)), base);
+        // 2) Nếu không có list render sẵn, lấy nút ĐỌC NGAY/current-reading làm chap đầu tiên.
+        if (chapters.length === 0) {
+            var readLinks = doc.select("a.btn-danger[href], .current-reading a[href], a[href*='/chap-'], a[href*='/one-shot'], a[href*='/oneshot'], a[href*='/coming-soon']");
+            for (var r = 0; r < readLinks.size(); r++) {
+                var ra = readLinks.get(r);
+                addChapter(chapters, used, getAttr(ra, "href"), getAttr(ra, "title") || getText(ra), storyBase);
             }
         }
 
+        // 3) Fallback cuối: nếu trang chỉ hiện D.S Chương (n) nhưng không render danh sách, sinh chap-1..chap-n.
+        // Chỉ áp dụng khi URL mẫu của website dùng /chap-n.html.
+        if (chapters.length === 0) {
+            var count = findChapterCount(doc);
+            if (count > 0 && count < 500) {
+                for (var c = count; c >= 1; c--) {
+                    addChapter(chapters, used, storyBase + "/chap-" + c + ".html", "Chap " + c, storyBase);
+                }
+            }
+        }
+
+        // Sắp xếp tăng dần nếu tên chương có số: Chap 1, Chap 2...; one-shot giữ nguyên.
         try {
-            out.sort(function(a, b) {
-                var na = chapterNumber(a.name, a.url);
-                var nb = chapterNumber(b.name, b.url);
-                if (na < 0 || nb < 0) return 0;
+            chapters.sort(function(a, b) {
+                var na = parseInt((a.name || "").replace(/[^0-9]/g, ""), 10);
+                var nb = parseInt((b.name || "").replace(/[^0-9]/g, ""), 10);
+                if (isNaN(na) || isNaN(nb)) return 0;
                 return na - nb;
             });
-        } catch (e2) {}
-
-        Console.log("toc count: " + out.length);
-        return Response.success(out);
+        } catch (se) {}
+        Console.log("toc count: " + chapters.length);
+        return Response.success(chapters);
     } catch (e) {
         Console.log("toc error: " + e);
         return Response.success([]);
