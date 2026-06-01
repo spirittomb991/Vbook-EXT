@@ -9,6 +9,9 @@ try {
 } catch (e) {}
 
 var USE_PROXY_COVER = false; // đổi true nếu máy Vbook không hiện ảnh .avif
+var USE_PROXY_IMAGES = true; // Dùng proxy cho chapter images nếu gặp referer issues
+var USE_PROXY_LISTS = true; // Dùng proxy cho cover images trong lists (homepage, search, etc)
+var IMAGE_PROXY_SERVICE = "https://images.weserv.nl/?url=ssl:"; // Proxy service cho images
 
 function absUrl(url) {
     if (!url) return "";
@@ -61,7 +64,7 @@ function getDoc(url) {
     return fetchDoc(url);
 }
 
-function imgUrl(img) {
+function imgUrl(img, useProxy) {
     if (!img) return "";
     // Thử nhiều attributes khác nhau cho lazy loading ảnh
     var attrs = ["data-src", "data-original", "data-lazy-src", "data-image", "data-images", "data-url", "src"];
@@ -94,14 +97,21 @@ function imgUrl(img) {
         
         if (isValidImage || u.indexOf(BASE_URL) >= 0 || u.indexOf("lxmanga") >= 0 || u.indexOf("http") >= 0) {
             result = u;
-            // Xử lý AVIF proxy nếu cần
-            if (USE_PROXY_COVER && low.indexOf(".avif") >= 0) {
-                return "https://images.weserv.nl/?url=ssl:" + u.replace(/^https?:\/\//,"") + "&output=jpg";
-            }
             // Xử lý protocol-relative URLs
             if (result.indexOf("//") === 0) {
                 result = "https:" + result;
             }
+            
+            // Xử lý AVIF proxy
+            if (USE_PROXY_COVER && low.indexOf(".avif") >= 0) {
+                return "https://images.weserv.nl/?url=ssl:" + result.replace(/^https?:\/\//,"") + "&output=jpg";
+            }
+            
+            // Xử lý proxy cho referer issues
+            if (useProxy !== false && USE_PROXY_IMAGES && (result.indexOf("lxmanga") >= 0 || result.indexOf(BASE_URL) >= 0)) {
+                return IMAGE_PROXY_SERVICE + result.replace(/^https?:\/\//,"");
+            }
+            
             if (result) return result;
         }
     }
@@ -153,7 +163,7 @@ function parseList(doc) {
         var cover = "";
         
         if (img) {
-            cover = imgUrl(img);
+            cover = imgUrl(img, USE_PROXY_LISTS); // useProxy parameter from config
         }
         
         if (title === "" && img) title = cleanText(img.attr("alt"));

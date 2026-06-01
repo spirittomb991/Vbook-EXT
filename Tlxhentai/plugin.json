@@ -2,7 +2,7 @@
   "metadata": {
     "name": "T-lxhentai",
     "author": "VbookT",
-    "version": 5,
+    "version": 6,
     "source": "https://lxmanga.org/",
     "regexp": "https?:\\/\\/(www\\.)?lxmanga\\.org\\/.*",
     "description": "Truyện LXManga simple no utils",

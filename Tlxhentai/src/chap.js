@@ -40,7 +40,7 @@ function execute(url) {
     
     Console.log("Processing " + els.size() + " images...");
     for (var i = 0; i < els.size(); i++) {
-        var u = imgUrl(els.get(i));
+        var u = imgUrl(els.get(i), true); // useProxy=true for chapter images
         if (!u) {
             Console.log("Image " + i + ": empty URL");
             continue;
@@ -57,7 +57,7 @@ function execute(url) {
             continue;
         }
         used[u] = true;
-        Console.log("Image " + i + ": added - " + u.substring(0, 50) + "...");
+        Console.log("Image " + i + ": added - " + u.substring(0, 80) + "...");
         imgs.push({link: u, fallback: u});
     }
     
