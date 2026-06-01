@@ -12,6 +12,7 @@ function execute(url, page) {
     if (!doc) return Response.success([], "");
     var data = parseList(doc);
     if (data.length === 0) {
+        Console.log("No results on first try, retrying with browser...");
         var doc2 = getDocByBrowser(url, 7000);
         data = parseList(doc2);
         var next2 = findNext(doc2, url);

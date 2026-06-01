@@ -63,21 +63,49 @@ function getDoc(url) {
 
 function imgUrl(img) {
     if (!img) return "";
-    var attrs = ["data-src", "data-original", "data-lazy-src", "data-url", "src"];
+    // Thử nhiều attributes khác nhau cho lazy loading ảnh
+    var attrs = ["data-src", "data-original", "data-lazy-src", "data-image", "data-images", "data-url", "src"];
+    var result = "";
+    
     for (var i = 0; i < attrs.length; i++) {
         var u = img.attr(attrs[i]);
-        if (!u) continue;
-        u = absUrl(("" + u).replace(/&amp;/g, "&"));
+        if (!u || u.trim().length === 0) continue;
+        
+        u = ("" + u).trim().replace(/&amp;/g, "&").replace(/\s+/g, "");
+        if (!u || u.length === 0) continue;
+        
+        u = absUrl(u);
+        if (!u || u.length === 0) continue;
+        
         var low = u.toLowerCase();
-        if (low.indexOf("noimage") >= 0 || low.indexOf("logo") >= 0 || low.indexOf("icon") >= 0 || low.indexOf(".svg") >= 0) continue;
-        if (low.indexOf(".jpg") >= 0 || low.indexOf(".jpeg") >= 0 || low.indexOf(".png") >= 0 || low.indexOf(".webp") >= 0 || low.indexOf(".avif") >= 0) {
+        
+        // Lọc các ảnh không mong muốn
+        if (low.indexOf("noimage") >= 0 || low.indexOf("logo") >= 0 || low.indexOf("icon") >= 0 || 
+            low.indexOf("avatar") >= 0 || low.indexOf("placeholder") >= 0 || low.indexOf("default") >= 0) continue;
+        if (low.indexOf(".svg") >= 0) continue;
+        
+        // Kiểm tra định dạng ảnh hỗ trợ
+        var isValidImage = low.indexOf(".jpg") >= 0 || low.indexOf(".jpeg") >= 0 || low.indexOf(".png") >= 0 || 
+                          low.indexOf(".webp") >= 0 || low.indexOf(".avif") >= 0 || low.indexOf(".gif") >= 0 ||
+                          low.indexOf(".bmp") >= 0 || low.indexOf(".tiff") >= 0;
+        
+        // Nếu không rõ định dạng, vẫn chấp nhận nếu có domain
+        if (!isValidImage && (low.indexOf("http") < 0 && low.indexOf("lxmanga") < 0)) continue;
+        
+        if (isValidImage || u.indexOf(BASE_URL) >= 0 || u.indexOf("lxmanga") >= 0 || u.indexOf("http") >= 0) {
+            result = u;
+            // Xử lý AVIF proxy nếu cần
             if (USE_PROXY_COVER && low.indexOf(".avif") >= 0) {
-                return "https://images.weserv.nl/?url=ssl:" + u.replace(/^https?:\/\//, "") + "&output=jpg";
+                return "https://images.weserv.nl/?url=ssl:" + u.replace(/^https?:\/\//,"") + "&output=jpg";
             }
-            return u;
+            // Xử lý protocol-relative URLs
+            if (result.indexOf("//") === 0) {
+                result = "https:" + result;
+            }
+            if (result) return result;
         }
     }
-    return "";
+    return result;
 }
 
 function parseList(doc) {
@@ -85,8 +113,31 @@ function parseList(doc) {
     var used = {};
     if (!doc) return data;
 
-    var links = doc.select("a.comic-tmb[href]");
-    Console.log("comic-tmb links: " + links.size());
+    // Try multiple selector patterns for flexibility
+    var selectors = [
+        "a.comic-tmb[href]",
+        "a.comic-item[href]",
+        ".comic-item a[href]",
+        ".story-item a[href]",
+        ".book-item a[href]",
+        ".comic-box a[href]",
+        ".manga-item a[href]",
+        "a[href*='.html'][href*='/'][href]:not([href*='/chap-']):not([href*='/page/'])"
+    ];
+    
+    var links = null;
+    for (var s = 0; s < selectors.length; s++) {
+        links = doc.select(selectors[s]);
+        if (links && links.size() > 0) {
+            Console.log("Found " + links.size() + " links using selector: " + selectors[s]);
+            break;
+        }
+    }
+    
+    if (!links || links.size() === 0) {
+        Console.log("No comic links found with any selector");
+        return data;
+    }
 
     for (var i = 0; i < links.size(); i++) {
         var a = links.get(i);
@@ -94,10 +145,17 @@ function parseList(doc) {
         if (href.indexOf(BASE_URL) !== 0) continue;
         if (href.indexOf(".html") < 0) continue;
         if (href.indexOf("/chap-") >= 0) continue;
+        if (href.indexOf("/page/") >= 0) continue;
         if (used[href]) continue;
 
         var title = cleanText(a.attr("title"));
         var img = a.select("img").first();
+        var cover = "";
+        
+        if (img) {
+            cover = imgUrl(img);
+        }
+        
         if (title === "" && img) title = cleanText(img.attr("alt"));
         if (title === "") title = cleanText(a.text());
         if (title === "") continue;
@@ -107,7 +165,7 @@ function parseList(doc) {
             name: title,
             link: href,
             host: HOST,
-            cover: imgUrl(img),
+            cover: cover,
             description: ""
         });
     }
