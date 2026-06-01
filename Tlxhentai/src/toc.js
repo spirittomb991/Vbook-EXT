@@ -23,7 +23,6 @@ function chapterNameFromHref(href) {
         var arr = s.split("/");
         var slug = arr[arr.length - 1].replace(/\.html$/i, "");
         if (slug === "coming-soon") return "Coming Soon";
-        if (slug === "one-shot" || slug === "oneshot") return "One Shot";
         return cleanText(slug.replace(/-/g, " ").replace(/\bchap\b/i, "Chap"));
     } catch (e) { return "Chapter"; }
 }
@@ -71,7 +70,7 @@ function execute(url) {
         var used = {};
 
         // 1) Chỉ ưu tiên đúng vùng danh sách chương, không quét toàn trang để tránh lấy truyện liên quan.
-        var listLinks = doc.select("#result-for-action ul.chapter-list a[href], ul.chapter-list a[href], .chapter-list a[href]");
+        var listLinks = doc.select("ul.chapter-list a[href], #result-for-action ul.chapter-list a[href], .chapter-list a[href], .result-for-action-content a[href]");
         for (var i = 0; i < listLinks.size(); i++) {
             var a = listLinks.get(i);
             addChapter(chapters, used, getAttr(a, "href"), getText(a) || getAttr(a, "title"), storyBase);
@@ -79,7 +78,7 @@ function execute(url) {
 
         // 2) Nếu không có list render sẵn, lấy nút ĐỌC NGAY/current-reading làm chap đầu tiên.
         if (chapters.length === 0) {
-            var readLinks = doc.select("a.btn-danger[href], .current-reading a[href], a[href*='/chap-'], a[href*='/one-shot'], a[href*='/oneshot'], a[href*='/coming-soon']");
+            var readLinks = doc.select("a.btn-danger[href], .current-reading a[href], a[href*='/chap-'], a[href*='/coming-soon']");
             for (var r = 0; r < readLinks.size(); r++) {
                 var ra = readLinks.get(r);
                 addChapter(chapters, used, getAttr(ra, "href"), getAttr(ra, "title") || getText(ra), storyBase);
@@ -88,24 +87,17 @@ function execute(url) {
 
         // 3) Fallback cuối: nếu trang chỉ hiện D.S Chương (n) nhưng không render danh sách, sinh chap-1..chap-n.
         // Chỉ áp dụng khi URL mẫu của website dùng /chap-n.html.
-        if (chapters.length === 0) {
+        if (chapters.length <= 1) {
             var count = findChapterCount(doc);
-            if (count > 0 && count < 500) {
+            if (count > chapters.length && count < 500) {
+                chapters = [];
+                used = {};
                 for (var c = count; c >= 1; c--) {
                     addChapter(chapters, used, storyBase + "/chap-" + c + ".html", "Chap " + c, storyBase);
                 }
             }
         }
 
-        // Sắp xếp tăng dần nếu tên chương có số: Chap 1, Chap 2...; one-shot giữ nguyên.
-        try {
-            chapters.sort(function(a, b) {
-                var na = parseInt((a.name || "").replace(/[^0-9]/g, ""), 10);
-                var nb = parseInt((b.name || "").replace(/[^0-9]/g, ""), 10);
-                if (isNaN(na) || isNaN(nb)) return 0;
-                return na - nb;
-            });
-        } catch (se) {}
         Console.log("toc count: " + chapters.length);
         return Response.success(chapters);
     } catch (e) {

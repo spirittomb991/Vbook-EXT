@@ -2,7 +2,7 @@
   "metadata": {
     "name": "T-lxhentai",
     "author": "VbookT",
-    "version": 2,
+    "version": 3,
     "source": "https://lxmanga.org/",
     "regexp": "https?:\\/\\/(www\\.)?lxmanga\\.org\\/.*",
     "description": "Truyện T-lxhentai",

@@ -128,53 +128,44 @@ function firstSrcFromSrcset(srcset) {
     return "";
 }
 
-function pickImageAttr(img) {
-    try {
-        if (!img) return "";
-        // LXMANGA dùng src=noimage.jpg và ảnh thật nằm ở data-src.
-        // Vì vậy tuyệt đối ưu tiên data-src trước src.
-        var attrs = ["data-src", "data-original", "data-lazy-src", "data-url", "data-full", "data-image", "data-bg", "data-cfsrc", "srcset", "src"];
-        for (var i = 0; i < attrs.length; i++) {
-            var val = "";
-            if (attrs[i] === "srcset") val = firstSrcFromSrcset(getAttr(img, attrs[i]));
-            else val = getAttr(img, attrs[i]);
-            val = cleanImageUrlForAny(val);
-            if (isGoodImage(val)) return val;
-        }
-    } catch (e) {}
-    return "";
-}
-
 function getImageFromElement(root) {
     try {
         if (!root) return "";
 
-        // 1) Đúng HTML list LXMANGA: a.comic-tmb > .image-container > img.card-img-top
-        // src có thể là noimage.jpg, data-src mới là cover thật.
-        var coverImgs = root.select("a.comic-tmb img.card-img-top");
-        for (var c = 0; c < coverImgs.size(); c++) {
-            var cover = pickImageAttr(coverImgs.get(c));
-            if (cover !== "") return cover;
-        }
-
-        // 2) Fallback cho search/home/genre carousel.
-        var priorityImgs = root.select(".image-container img.card-img-top, img.card-img-top, a.comic-tmb img, .image-container img, img.img-thumbnail");
+        // Ưu tiên ảnh bìa thật của card truyện trước. Website có thể có noimage ở style/background hoặc ảnh mask.
+        var priorityImgs = root.select("a.comic-tmb img.card-img-top, .image-container img.card-img-top, img.card-img-top, img.img-thumbnail, .comic-tmb img, .image-container img");
         for (var p = 0; p < priorityImgs.size(); p++) {
-            var src = pickImageAttr(priorityImgs.get(p));
-            if (src !== "") return src;
+            var pimg = priorityImgs.get(p);
+            var pattrs = ["data-src", "data-original", "data-lazy-src", "data-url", "data-full", "data-image", "data-bg", "src"];
+            for (var pa = 0; pa < pattrs.length; pa++) {
+                var psrc = getAttr(pimg, pattrs[pa]);
+                psrc = decodeNextImage(toAbsoluteUrl(psrc));
+                if (isGoodImage(psrc)) return psrc;
+            }
+            var psrcset = firstSrcFromSrcset(getAttr(pimg, "srcset"));
+            psrcset = decodeNextImage(toAbsoluteUrl(psrcset));
+            if (isGoodImage(psrcset)) return psrcset;
         }
 
-        // 3) Fallback toàn bộ ảnh nhưng vẫn lọc noimage/imgmask/svg.
         var imgs = root.select("img");
         for (var i = 0; i < imgs.size(); i++) {
-            var src2 = pickImageAttr(imgs.get(i));
-            if (src2 !== "") return src2;
+            var img = imgs.get(i);
+            var attrs = ["data-src", "data-original", "data-lazy-src", "data-url", "data-full", "data-image", "data-bg", "src"];
+            for (var a = 0; a < attrs.length; a++) {
+                var src = getAttr(img, attrs[a]);
+                src = decodeNextImage(toAbsoluteUrl(src));
+                if (isGoodImage(src)) return src;
+            }
+            var srcset = firstSrcFromSrcset(getAttr(img, "srcset"));
+            srcset = decodeNextImage(toAbsoluteUrl(srcset));
+            if (isGoodImage(srcset)) return srcset;
         }
 
-        // 4) Background chỉ dùng cuối cùng.
+        // Background chỉ dùng fallback sau cùng vì có thể là noimage/blur placeholder.
         var styled = root.select("[style]");
         for (var s = 0; s < styled.size(); s++) {
-            var bg = cleanImageUrlForAny(extractUrlFromStyle(getAttr(styled.get(s), "style")));
+            var bg = extractUrlFromStyle(getAttr(styled.get(s), "style"));
+            bg = decodeNextImage(toAbsoluteUrl(bg));
             if (isGoodImage(bg)) return bg;
         }
     } catch (e) {}
@@ -205,10 +196,14 @@ function decodeNextImage(url) {
 
 function proxyCoverUrl(url) {
     try {
-        // Trả ảnh gốc của website. Không đổi sang proxy vì Vbook có thể không load được proxy
-        // và website dùng cover thật dạng .avif trong wp-content/uploads.
         url = cleanImageUrlForAny(url);
         if (!url) return "";
+        var u = url.toLowerCase();
+        // Vbook/Android cũ thường lỗi AVIF hoặc hotlink từ wp-content. Proxy sang JPG cho cover.
+        if (u.indexOf("lxmanga.org/wp-content/uploads/") >= 0 || u.indexOf(".avif") >= 0) {
+            var raw = url.replace(/^https?:\/\//, "");
+            return "https://images.weserv.nl/?url=" + raw + "&output=jpg";
+        }
         return url;
     } catch (e) { return url; }
 }
@@ -229,16 +224,12 @@ function parseComicList(doc) {
     var list = [];
     var used = {};
     try {
-        var cards = doc.select(".col.pb-3, .col, li.splide__slide, .card");
+        var cards = doc.select(".card, .col, li.splide__slide");
         for (var i = 0; i < cards.size(); i++) {
             var card = cards.get(i);
             var a = null;
-            var links = card.select("a.comic-link[href], a.comic-tmb[href]");
+            var links = card.select("a.comic-link[href], a.comic-tmb[href], a[href$=.html]");
             if (links.size() > 0) a = links.get(0);
-            if (!a) {
-                links = card.select("a[href$=.html]");
-                if (links.size() > 0) a = links.get(0);
-            }
             if (!a) continue;
             var href = toAbsoluteUrl(getAttr(a, "href"));
             var title = getAttr(a, "title");
