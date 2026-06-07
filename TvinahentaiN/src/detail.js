@@ -20,16 +20,32 @@ function execute(url) {
   if (name === "" || isBadTitle(name)) name = makeNameFromUrl(pageUrl);
 
   var cover = "";
-  var imgs = doc.select("img");
-  for (var i = 0; i < imgs.size(); i++) {
-    var img = imgs.get(i);
-    var src = absUrl(getAttr(img, "src"));
-    var alt = getAttr(img, "alt");
-    var low = (src + " " + alt).toLowerCase();
-    if (src === "") continue;
-    if (low.indexOf("logo") >= 0 || low.indexOf("avatar") >= 0 || low.indexOf("favicon") >= 0) continue;
-    cover = safeUrl(src);
-    break;
+  var ogImage = getFirst(doc, "meta[property='og:image']");
+  if (ogImage) {
+    cover = absUrl(getAttr(ogImage, "content"));
+    if (cover) cover = safeUrl(cover);
+  }
+
+  if (!cover) {
+    var coverImg = getFirst(doc, "img[alt*='Bìa truyện'], img[alt*='Bia truyện'], img[alt*='cover'], img[alt*='poster'], img[src*='/manga-posters/'], img[src*='/story-images/']");
+    if (coverImg) {
+      cover = safeUrl(getImageSrc(coverImg));
+    }
+  }
+
+  if (!cover) {
+    var imgs = doc.select("img");
+    for (var i = 0; i < imgs.size(); i++) {
+      var img = imgs.get(i);
+      var src = getImageSrc(img);
+      var alt = getAttr(img, "alt");
+      var low = (src + " " + alt).toLowerCase();
+      if (src === "") continue;
+      if (low.indexOf("logo") >= 0 || low.indexOf("avatar") >= 0 || low.indexOf("favicon") >= 0) continue;
+      if (low.indexOf("banner") >= 0 || low.indexOf("ads") >= 0 || low.indexOf("advert") >= 0) continue;
+      cover = safeUrl(src);
+      break;
+    }
   }
 
   var author = "";
