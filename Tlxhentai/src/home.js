@@ -1,11 +1,13 @@
-load('config.js');
+load("utils.js");
+
 function execute() {
     return Response.success([
-        {title: "Truyện Mới", input: BASE_URL + "/moi-cap-nhat", script: "homecontent.js"},
-        {title: "Hot Nhất", input: BASE_URL + "/truyen-tranh-hot", script: "homecontent.js"},
-        {title: "Xem Nhiều", input: BASE_URL + "/moi-cap-nhat?sort=most_viewed", script: "homecontent.js"},
-        {title: "Top Đánh Giá", input: BASE_URL + "/moi-cap-nhat?sort=top_rated", script: "homecontent.js"},
-        {title: "Hoàn Thành", input: BASE_URL + "/da-hoan-thanh", script: "homecontent.js"},
-        {title: "Trang Chủ", input: BASE_URL + "/", script: "homecontent.js"}
+        { title: "Mới cập nhật", input: BASE_URL + "/", script: "homecontent.js" },
+        { title: "English", input: BASE_URL + "/language/hentai-english/", script: "homecontent.js" },
+        { title: "Tiếng Việt", input: BASE_URL + "/language/hentai-tieng-viet/", script: "homecontent.js" },
+        { title: "Doujinshi", input: BASE_URL + "/category/doujinshi/", script: "homecontent.js" },
+        { title: "Hentai", input: BASE_URL + "/category/hentai/", script: "homecontent.js" },
+        { title: "Hentai Uncensored", input: BASE_URL + "/category/hentai-uncensored/", script: "homecontent.js" },
+        { title: "Comics", input: BASE_URL + "/category/comics/", script: "homecontent.js" }
     ]);
 }

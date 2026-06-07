@@ -1,52 +1,28 @@
-load('config.js');
-
-function _normalizeUrl(u) {
-    if (!u) return BASE_URL + "/";
-    u = ("" + u).trim();
-    if (u.startsWith("http")) return u;
-    if (u.startsWith("//")) return "https:" + u;
-    if (u.startsWith("/")) return BASE_URL + u;
-    return BASE_URL + "/" + u;
-}
+load("utils.js");
 
 function execute() {
-    try {
-        let url = BASE_URL + "/tags/popular";
-        let doc = fetch(url).html();
-        if (!doc) return Response.error("Không lấy được HTML tags");
+    var doc = getDoc(BASE_URL + "/tags/");
+    if (!doc) return Response.error("Không tải được tags");
 
-        let tags = [];
-        let tagNodes = doc.select("#tag-container a");
-        if (!tagNodes || tagNodes.size() === 0) {
-            tagNodes = doc.select(".tag-container a"); // fallback
-        }
+    var out = [];
+    var used = {};
+    var links = doc.select("a[href*='/tag/']");
 
-        tagNodes.forEach(e => {
-            let tagName = e.select("span.name").text().trim();
-            let tagLink = e.attr("href");
+    for (var i = 0; i < links.size(); i++) {
+        var a = links.get(i);
+        var href = abs(attr(a, "href"));
+        var title = text(a).replace(/\s+\d+$/, "");
 
-            if (tagName && tagLink) {
-                // Normalize path
-                tagLink = _normalizeUrl(tagLink).replace(BASE_URL, "");
+        if (!title || used[href]) continue;
 
-                // Popular tab
-                tags.push({
-                    title: tagName + " - Popular",
-                    input: BASE_URL + tagLink + "/popular",
-                    script: "gen.js"
-                });
-
-                // New tab (default)
-                tags.push({
-                    title: tagName + " - New",
-                    input: BASE_URL + tagLink + "/",
-                    script: "gen.js"
-                });
-            }
+        out.push({
+            title: title,
+            input: href,
+            script: "gen.js"
         });
 
-        return Response.success(tags);
-    } catch (err) {
-        return Response.error("genre.js error: " + err);
+        used[href] = true;
     }
+
+    return Response.success(out);
 }

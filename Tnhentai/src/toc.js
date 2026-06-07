@@ -1,8 +1,9 @@
+load("utils.js");
+
 function execute(url) {
-    const data = [];
-    data.push({
-        name: "Oneshot",
-        url: url
-    });
-    return Response.success(data);
+    return Response.success([{
+        name: "Full",
+        url: url,
+        host: BASE_URL
+    }]);
 }

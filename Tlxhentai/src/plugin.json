@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "name": "T-NHentaiN",
-    "author": "VBookT",
+    "name": "NHentai Online",
+    "author": "OpenAI",
     "version": 1,
-    "source": "https://nhentai.online",
-    "regexp": "https://nhentai\\.online/.+",
+    "source": "https://nhentai.online/",
+    "regexp": "https?:\\/\\/(www\\.)?nhentai\\.online\\/.*",
     "description": "Extension đọc gallery cho nhentai.online"
   },
   "script": {

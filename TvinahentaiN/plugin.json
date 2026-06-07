@@ -2,9 +2,9 @@
   "metadata": {
     "name": "T-VinaHentaiNew",
     "author": "VbookT",
-    "version": 3,
-    "source": "https://vinahentai.life",
-    "regexp": "https?:\\/\\/(www\\.)?vinahentai\\.life\\/truyen-hentai\\/.+",
+    "version": 4,
+    "source": "https://vinahentai.bond",
+    "regexp": "https?:\\/\\/(www\\.)?vinahentai\\.bond\\/truyen-hentai\\/.+",
     "description": "Extension đọc truyện tranh từ VinaHentai cho Vbook",
     "locale": "vi_VN",
     "tag": "nsfw",
