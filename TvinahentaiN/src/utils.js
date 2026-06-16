@@ -43,6 +43,20 @@ function safeUrl(url) {
   return encodeUrlForVbook(url);
 }
 
+function setPageParam(url, page) {
+  var pageNo = parseInt(page, 10);
+  if (!pageNo || pageNo < 1) pageNo = 1;
+
+  var u = safeUrl(url);
+  if (u === "") return "";
+
+  u = u.replace(/([?&])page=\d+/i, "$1page=" + pageNo);
+  if (u.match(/[?&]page=\d+/i)) return u;
+
+  if (pageNo === 1) return u;
+  return u + (u.indexOf("?") >= 0 ? "&" : "?") + "page=" + pageNo;
+}
+
 // Chỉ dùng để so sánh slug/path, không dùng để trả về Vbook.
 function decodeUrlForCompare(url) {
   var u = cleanInputUrl(url);

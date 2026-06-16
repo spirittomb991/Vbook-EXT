@@ -12,11 +12,7 @@ function execute(key, page) {
     }
 
     var q = encodeURIComponent(String(key || ""));
-    var url = BASE_URL + "/search?q=" + q;
-
-    if (pageNo > 1) {
-        url += "&page=" + pageNo;
-    }
+    var url = setPageParam(BASE_URL + "/search?q=" + q, pageNo);
 
     var doc = getDoc(url);
     var list = [];
