@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "name": "Metruyenhot",
+    "author": "<Tên tác giả>",
+    "version": 1,
+    "source": "https://metruyenhot.vn/",
+    "regexp": "^https://metruyenhot.vn/.*$",
+    "description": "Extension cho trang metruyenhot.vn",
+    "locale": "vi_VN",
+    "tag": "",
+    "type": "comic"
+  },
+  "script": {
+    "home": "home.js",
+    "detail": "detail.js",
+    "toc": "toc.js",
+    "chap": "chap.js"
+  }
+}

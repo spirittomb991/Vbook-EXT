@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "name": "NHentai Online",
+    "author": "OpenAI",
+    "version": 1,
+    "source": "https://nhentai.online/",
+    "regexp": "https?:\\/\\/(www\\.)?nhentai\\.online\\/.*",
+    "description": "Extension đọc gallery cho nhentai.online"
+  },
+  "script": {
+    "home": "home.js",
+    "genre": "genre.js",
+    "search": "search.js",
+    "detail": "detail.js",
+    "toc": "toc.js",
+    "chap": "chap.js"
+  }
+}

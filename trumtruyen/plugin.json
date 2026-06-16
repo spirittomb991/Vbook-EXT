@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "name": "Trùm Truyện",
+    "author": "VbookT",
+    "version": 1,
+    "source": "https://trumtruyen.live",
+    "regexp": "(www.)?(m.)?trumtruyen.live/[^/]+/[^/]+$",
+    "description": "Đọc truyện trên trang Trùm Truyện",
+    "locale": "vi_VN",
+    "type": "novel",
+    "language": "javascript"
+  },
+  "script": {
+    "home": "home.js",
+    "genre": "genre.js",
+    "detail": "detail.js",
+    "search": "search.js",
+    "toc": "toc.js",
+    "chap": "chap.js"
+  }
+}
