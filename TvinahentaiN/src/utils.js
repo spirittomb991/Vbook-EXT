@@ -1,4 +1,4 @@
-var BASE_URL = "https://vinahentai.bond";
+var BASE_URL = "https://vinahentai.click";
 
 function S(v) {
   if (v === null || v === undefined) return "";
@@ -300,7 +300,7 @@ function decodeImageUrl(src) {
   s = s.replace(/\\\//g, "/");
 
   // Next/Image thường trả dạng:
-  // /_next/image?url=https%3A%2F%2Fcdn.vinahentai.bond%2Fmanga-images%2F...jpg&w=...
+  // /_next/image?url=https%3A%2F%2Fcdn.vinahentai.click%2Fmanga-images%2F...jpg&w=...
   // Vbook đọc ổn hơn khi trả trực tiếp URL gốc trên CDN.
   var pos = s.indexOf("url=");
   if (pos >= 0) {
@@ -309,7 +309,7 @@ function decodeImageUrl(src) {
     if (amp >= 0) q = q.substring(0, amp);
     try { q = decodeURIComponent(q); } catch (e) {}
     q = q.replace(/\\\//g, "/");
-    if (q.indexOf("manga-images") >= 0 || q.indexOf("cdn.vinahentai.bond") >= 0) {
+    if (q.indexOf("manga-images") >= 0 || q.indexOf("cdn.vinahentai.click") >= 0) {
       return absUrl(q);
     }
   }
@@ -319,7 +319,7 @@ function decodeImageUrl(src) {
     var d = s;
     try { d = decodeURIComponent(s); } catch (e2) {}
     d = d.replace(/\\\//g, "/");
-    if (d.indexOf("manga-images") >= 0 || d.indexOf("cdn.vinahentai.bond") >= 0) return absUrl(d);
+    if (d.indexOf("manga-images") >= 0 || d.indexOf("cdn.vinahentai.click") >= 0) return absUrl(d);
   }
 
   return absUrl(s);
@@ -352,10 +352,10 @@ function isComicImage(src, img, chapUrl) {
   if (low.indexOf("banner") >= 0) return false;
   if (low.indexOf("ads") >= 0 || low.indexOf("advert") >= 0) return false;
 
-  // Ảnh chương của site nằm trên cdn.vinahentai.bond/manga-images/...
+  // Ảnh chương của site nằm trên cdn.vinahentai.click/manga-images/...
   var decodedSrc = S(src);
   try { decodedSrc = decodeURIComponent(decodedSrc); } catch (e) {}
-  if (decodedSrc.indexOf("cdn.vinahentai.bond/manga-images/") >= 0) return true;
+  if (decodedSrc.indexOf("cdn.vinahentai.click/manga-images/") >= 0) return true;
   if (decodedSrc.indexOf("/manga-images/") >= 0) return true;
 
   // Fallback: giữ ảnh có alt dạng Chapter nếu site đổi domain CDN.
