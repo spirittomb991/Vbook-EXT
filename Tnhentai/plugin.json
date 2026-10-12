@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "name": "T-NHentaiN",
+    "author": "VBookT",
+    "version": 1,
+    "source": "https://nhentai.online",
+    "regexp": "https://nhentai\\.online/.+",
+    "description": "Extension đọc gallery cho nhentai.online"
+  },
+  "script": {
+    "home": "home.js",
+    "genre": "genre.js",
+    "search": "search.js",
+    "detail": "detail.js",
+    "toc": "toc.js",
+    "chap": "chap.js"
+  }
+}
